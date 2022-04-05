@@ -1,0 +1,20 @@
+[23/03/2022 14:58:18.000] [Success] SDL Init SUCCEEDED
+[23/03/2022 14:58:18.087] [Success] IMG Init SUCCEEDED
+[23/03/2022 14:58:18.088] [Info] Settings:
+Window Height: 500
+Window Width: 1000
+Max Framerate: 120
+Scale: 1
+Gui Scale: 1
+Vsync: false
+GPU Acceleration: true
+Software Fallback: false
+Target Texture: true
+FPS Counter: true
+Log File: true
+Output Color: true
+[23/03/2022 14:58:18.124] [Success] Window Init SUCCEEDED
+[23/03/2022 14:58:18.139] [Success] Texture res/img/cursor.png Init SUCCEEDED
+[23/03/2022 14:58:18.140] [Success] Texture res/img/grass_block.png Init SUCCEEDED
+[23/03/2022 14:58:18.140] [Success] Texture res/img/font.png Init SUCCEEDED
+[23/03/2022 14:58:33.189] [Info] Game Windwow Closed

@@ -1,0 +1,29 @@
+{
+	"interpreter" : 
+	{
+		"file" : "binary.hex",
+		"ram_size" : 1000,
+		"start" : 0
+	},
+	"window" : 
+	{
+		"fps_counter" : true,
+		"gui_scale" : 1,
+		"height" : 500,
+		"max_framerate" : 120,
+		"renderer_flags" : 
+		{
+			"gpu_acceleration" : true,
+			"software_fallback" : false,
+			"target_texture" : true,
+			"vsync" : false
+		},
+		"scale" : 1,
+		"width" : 1000
+	},
+	"console" : 
+	{
+		"file_log" : false,
+		"output_color" : true
+	}
+}
