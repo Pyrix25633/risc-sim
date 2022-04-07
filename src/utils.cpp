@@ -369,6 +369,16 @@ void ArithmeticLogicUnit::rShift(Uint8 r) {
     SR->N = (Int16(R[r]) < 0x0);
 }
 
+void ArithmeticLogicUnit::load(Uint8 r, Uint16 word) {
+    if(r > 0xF) return;
+    R[r] = word;
+}
+
+Uint16 ArithmeticLogicUnit::get(Uint8 r) {
+    if(r > 0xF) return 0;
+    return R[r];
+}
+
 CentralProcessingUnit::CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD, Uint16 start)
     :ALU(ArithmeticLogicUnit(&SR)), SB(pSB), CM(pCM), IOD(pIOD), PC(start) {}
 
@@ -396,6 +406,36 @@ void CentralProcessingUnit::decodeInstruction() {
 
 Uint16* CentralProcessingUnit::getIR() {
     return &IR;
+}
+
+void CentralProcessingUnit::ldwa() {
+    AR = PC;
+    SB->writeAddress(AR);
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    ALU.load(I.r1, SB->readData());
+    PC += 2;
+}
+
+void CentralProcessingUnit::ldwi() {
+    AR = PC;
+    SB->writeAddress(AR);
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    SB->writeAddress(SB->readData());
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    ALU.load(I.r1, SB->readData());
+    PC += 2;
+}
+
+void CentralProcessingUnit::ldwr() {
+    AR = ALU.get(I.r2);
+    SB->writeAddress(AR);
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    ALU.load(I.r1, SB->readData());
+    PC += 2;
 }
 
 CentralMemory::CentralMemory(SystemBus* pSB, Uint16 psize) :SB(pSB), size(psize) {

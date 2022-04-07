@@ -327,6 +327,17 @@ class ArithmeticLogicUnit {
          * @param r Register
         */
         void rShift(Uint8 r);
+        /**
+         * @brief Function to load a word in a register
+         * @param r Register number
+         * @param word The word to load
+        */
+        void load(Uint8 r, Uint16 word);
+        /**
+         * @brief Funtion to get the word from a register
+         * @param r The register number
+        */
+        Uint16 get(Uint8 r);
     private:
         Uint16 R[16]; //Registers from 0 to 15
         StatusRegister* SR; //Status register pointer
@@ -347,7 +358,7 @@ class CentralProcessingUnit{
         */
         void fetchInstruction();
         /**
-         * @brief Function to decode the instruction
+         * @brief Function to decodes the instruction
         */
         void decodeInstruction();
         void fetchOperand();
@@ -366,6 +377,18 @@ class CentralProcessingUnit{
         SystemBus* SB; //System Bus pointer
         CentralMemory* CM; //Central Memory pointer
         InputOutputDevices* IOD; //Input Output Devices pointer
+        /**
+         * @brief Function that loads a word, that is after the instruction, in a register
+        */
+        void ldwi();
+        /**
+         * @brief Function that loads a word, from an address that is after the instruction, in a register
+        */
+        void ldwa();
+        /**
+         * @brief Function that loads a word, from an address that is in a register, in a register
+        */
+        void ldwr();
 };
 
 class CentralMemory {
