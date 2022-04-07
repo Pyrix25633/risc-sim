@@ -24,6 +24,15 @@ typedef int8_t Int8;
 typedef int16_t Int16;
 typedef int32_t Int32;
 
+struct ControlBus;
+struct Instruction;
+struct StatusRegister;
+struct Logger;
+struct RendererFlags;
+struct InterpreterSettings;
+struct ConsoleSettings;
+struct WindowSettings;
+
 /**
  * @brief Structure that contains the control bus variables
  * @param R Read

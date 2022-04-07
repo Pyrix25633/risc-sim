@@ -1,8 +1,8 @@
 .RECIPEPREFIX = >
 CC = g++
 CFLAGS = -ljsoncpp -lSDL2main -lSDL2 -lSDL2_image
-WININCLUDES = -I include -I C:/C++/SDL2-w64/include -I C:/C++
-WINCFLAGS = -L C:/C++/SDL2-w64/lib -lSDL2main -lSDL2 -lSDL2_image -L C:/C++/jsoncpp/build-shared -ljsoncpp
+WININCLUDES = -I include -I libs/SDL2/include -I C:/C++
+WINCFLAGS = -L libs/SDL2/lib -lSDL2main -lSDL2 -lSDL2_image -L libs/jsoncpp/build-shared -ljsoncpp
 DEBUGFLAGS = -c src/*.cpp -std=c++14 -m64 -g -I include
 RELEASEFLAGS = -c src/*.cpp -std=c++14 -m64 -O3 -I include
 #INCLUDE =
@@ -13,15 +13,16 @@ default:
 win:
 > make debug-win
 
+remove:
+> rm *.o
+
 debug:
 > clear
-> rm *.o
 > make build-debug
 > make run-debug
 
 debug-win:
 > clear
-> rm *.o
 > make build-debug-win
 > make run-debug-win
 
