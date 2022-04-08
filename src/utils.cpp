@@ -299,8 +299,8 @@ void ArithmeticLogicUnit::bNot(Uint8 r) {
     R[r] = ~R[r];
     SR->C = false;
     SR->V = false;
-    SR->N = false;
-    SR->Z = false;
+    SR->N = (Int16(R[r]) < 0x0);
+    SR->Z = (R[r] == 0x0);
 }
 
 void ArithmeticLogicUnit::bAnd(Uint8 d, Uint8 s) {
@@ -309,8 +309,8 @@ void ArithmeticLogicUnit::bAnd(Uint8 d, Uint8 s) {
     R[d] = R[d] & R[s];
     SR->C = false;
     SR->V = false;
-    SR->N = false;
-    SR->Z = false;
+    SR->N = (Int16(R[d]) < 0x0);
+    SR->Z = (R[d] == 0x0);
 }
 
 void ArithmeticLogicUnit::bOr(Uint8 d, Uint8 s) {
@@ -319,8 +319,8 @@ void ArithmeticLogicUnit::bOr(Uint8 d, Uint8 s) {
     R[d] = R[d] | R[s];
     SR->C = false;
     SR->V = false;
-    SR->N = false;
-    SR->Z = false;
+    SR->N = (Int16(R[d]) < 0x0);
+    SR->Z = (R[d] == 0x0);
 }
 
 void ArithmeticLogicUnit::bXor(Uint8 d, Uint8 s) {
@@ -329,8 +329,8 @@ void ArithmeticLogicUnit::bXor(Uint8 d, Uint8 s) {
     R[d] = R[d] ^ R[s];
     SR->C = false;
     SR->V = false;
-    SR->N = false;
-    SR->Z = false;
+    SR->N = (Int16(R[d]) < 0x0);
+    SR->Z = (R[d] == 0x0);
 }
 
 void ArithmeticLogicUnit::inc(Uint8 r) {
@@ -344,7 +344,7 @@ void ArithmeticLogicUnit::inc(Uint8 r) {
 
 void ArithmeticLogicUnit::dec(Uint8 r) {
     if(r > 15) return;
-    SR->C = false;
+    SR->C = true;
     SR->V = (R[r] == 0x8000);
     R[r]--;
     SR->Z = (R[r] == 0x0);
@@ -353,8 +353,8 @@ void ArithmeticLogicUnit::dec(Uint8 r) {
 
 void ArithmeticLogicUnit::lShift(Uint8 r) {
     if(r > 15) return;
+    SR->C = (R[r] >= 0x8000);    
     R[r] = R[r] << 1;
-    SR->C = false;
     SR->V = false;
     SR->Z = (R[r] == 0x0);
     SR->N = (Int16(R[r]) < 0x0);
@@ -409,15 +409,20 @@ Uint16* CentralProcessingUnit::getIR() {
 }
 
 void CentralProcessingUnit::ldwa() {
+    Uint16 data;
     AR = PC;
     SB->writeAddress(AR);
     SB->writeControl(ControlBus(READ, MEMORY, WORD));
     CM->operate();
-    ALU.load(I.r1, SB->readData());
+    data = SB->readData();
+    ALU.load(I.r1, data);
+    SR.Z = (data == 0);
+    SR.N = Int16(data) < 0;
     PC += 2;
 }
 
 void CentralProcessingUnit::ldwi() {
+    Uint16 data;
     AR = PC;
     SB->writeAddress(AR);
     SB->writeControl(ControlBus(READ, MEMORY, WORD));
@@ -425,17 +430,61 @@ void CentralProcessingUnit::ldwi() {
     SB->writeAddress(SB->readData());
     SB->writeControl(ControlBus(READ, MEMORY, WORD));
     CM->operate();
-    ALU.load(I.r1, SB->readData());
+    data = SB->readData();
+    ALU.load(I.r1, data);
     PC += 2;
+    SR.Z = (data == 0);
+    SR.N = Int16(data) < 0;
 }
 
 void CentralProcessingUnit::ldwr() {
+    Uint16 data;
     AR = ALU.get(I.r2);
     SB->writeAddress(AR);
     SB->writeControl(ControlBus(READ, MEMORY, WORD));
     CM->operate();
-    ALU.load(I.r1, SB->readData());
+    data = SB->readData();
+    ALU.load(I.r1, data);
+    SR.Z = (data == 0);
+    SR.N = Int16(data) < 0;
+}
+
+void CentralProcessingUnit::ldba() {
+    Uint8 data;
+    AR = PC;
+    SB->writeAddress(AR);
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    data = SB->readData();
+    ALU.load(I.r1, data);
+    SR.Z = (data == 0);
+    PC++;
+}
+
+void CentralProcessingUnit::ldbi() {
+    Uint8 data;
+    AR = PC;
+    SB->writeAddress(AR);
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    SB->writeAddress(SB->readData());
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    data = SB->readData();
+    ALU.load(I.r1, data);
+    SR.Z = (data == 0);
     PC += 2;
+}
+
+void CentralProcessingUnit::ldbr() {
+    Uint8 data;
+    AR = ALU.get(I.r2);
+    SB->writeAddress(AR);
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    data = SB->readData();
+    ALU.load(I.r1, data);
+    SR.Z = (data == 0);
 }
 
 CentralMemory::CentralMemory(SystemBus* pSB, Uint16 psize) :SB(pSB), size(psize) {

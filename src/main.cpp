@@ -23,7 +23,9 @@ int main(int argc, char* args[]) {
     Uint64 previousSecond, currentSecond;
     long int msNow, msNext = SDL_GetTicks();
     string fpsString = "000", fpsCounter, fpsText = "FPS:";
-    Vector2d cursorPosition;
+    Vector2d cursorPosition, guiCursorPosition;
+    Uint8 cursorState; //0 -> normal, 1 -> hover
+    vector<HitBox2d> hitboxes = {HitBox2d(0, 0, 10, 10), HitBox2d(0, 100, 16, 16)}; //Vector of all hitboxes
 
     //Interpreter
     SystemBus SB;
@@ -61,12 +63,14 @@ int main(int argc, char* args[]) {
 
     //Loading the textures
     SDL_Texture* cursorTexture = Window.loadTexture("res/img/cursor.png");
+    SDL_Texture* cursorHoverTexture = Window.loadTexture("res/img/cursor_hover.png");
     SDL_Texture* grassBlockTexture = Window.loadTexture("res/img/grass_block.png");
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
-    vector<Entity> platforms = {Entity(Vector2f(0, 100), grassBlockTexture),
+    vector<Entity> platforms = {Entity(Vector2f(0, 100), grassBlockTexture)/*,
                                 Entity(Vector2f(16, 100), grassBlockTexture),
-                                Entity(Vector2f(32, 100), grassBlockTexture)};
-    Entity cursorEntity(Vector2f(0, 0), cursorTexture);
+                                Entity(Vector2f(32, 100), grassBlockTexture)*/};
+    vector<Entity> cursorEntity = {Entity(Vector2f(0, 0), cursorTexture),
+                                   Entity(Vector2f(0, 0), cursorHoverTexture)};
     TextEntity fpsCounterEntity(Vector2f(1, 1), fontTexture, &font);
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
@@ -111,7 +115,13 @@ int main(int argc, char* args[]) {
             }
             //Actual game processing
             SDL_GetMouseState(&cursorPosition.x, &cursorPosition.y);
-            cursorEntity.setXY(cursorPosition.x, cursorPosition.y);
+            guiCursorPosition.x = (cursorPosition.x / settings.win.scale / 4);
+            guiCursorPosition.y = (cursorPosition.y / settings.win.scale / 4);
+            for(HitBox2d h : hitboxes) {
+                if(guiCursorPosition == h) cursorState = 1;
+                else cursorState = 0;
+            }
+            cursorEntity[cursorState].setXY(cursorPosition.x, cursorPosition.y);
             Window.clear();
             for(Entity& p : platforms) {
                 Window.render(p);
@@ -121,7 +131,7 @@ int main(int argc, char* args[]) {
             }
             Window.renderText(someText);
             Window.renderText(textEntity);
-            Window.renderCursor(cursorEntity);
+            Window.renderCursor(cursorEntity[cursorState]);
             //Window.playSound();
             Window.display();
         }

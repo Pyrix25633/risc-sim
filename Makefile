@@ -5,6 +5,8 @@ WININCLUDES = -I include -I libs/SDL2/include -I C:/C++
 WINCFLAGS = -L libs/SDL2/lib -lSDL2main -lSDL2 -lSDL2_image -L libs/jsoncpp/build-shared -ljsoncpp
 DEBUGFLAGS = -c src/*.cpp -std=c++14 -m64 -g -I include
 RELEASEFLAGS = -c src/*.cpp -std=c++14 -m64 -O3 -I include
+VERSION = 0.0.1
+NAME = risc-sim
 #INCLUDE =
 
 default:
@@ -37,25 +39,25 @@ release-win:
 > make run-release-win
 
 build-debug:
-> $(CC) $(DEBUGFLAGS) && $(CC) *.o -o bin/debug/main $(CFLAGS)
+> $(CC) $(DEBUGFLAGS) && $(CC) *.o -o bin/debug/debug $(CFLAGS)
 
 build-debug-win:
-> $(CC) $(DEBUGFLAGS) $(WININCLUDES) && $(CC) *.o -o bin/debug/main $(WINCFLAGS)
+> $(CC) $(DEBUGFLAGS) $(WININCLUDES) && $(CC) *.o -o bin/debug/debug.exe $(WINCFLAGS)
 
 build-release:
-> $(CC) $(RELEASEFLAGS) && $(CC) *.o -o bin/release/main -s $(CFLAGS)
+> $(CC) $(RELEASEFLAGS) && $(CC) *.o -o bin/release/$(NAME)-$(VERSION) -s $(CFLAGS)
 
 build-release-win:
-> $(CC) $(RELEASEFLAGS) $(WININCLUDES) && $(CC) *.o -o bin/release/main -s $(WINCFLAGS)
+> $(CC) $(RELEASEFLAGS) $(WININCLUDES) && $(CC) *.o -o bin/release/$(NAME)-$(VERSION).exe -s $(WINCFLAGS)
 
 run-debug:
-> ./bin/debug/main
+> ./bin/debug/debug
 
 run-debug-win:
-> ./bin/debug/main.exe
+> ./bin/debug/debug.exe
 
 run-release:
-> ./bin/release/main
+> ./bin/release/$(NAME)-$(VERSION)
 
 run-release-win:
-> ./bin/release/main.exe
+> ./bin/release/$(NAME)-$(VERSION).exe

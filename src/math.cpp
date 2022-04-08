@@ -10,6 +10,14 @@ void Vector2f::print() {
     cout << x << ", " << y << endl;
 }
 
+bool Vector2f::operator == (HitBox2d hitbox) {
+    return (x >= hitbox.x && x <= (hitbox.x + hitbox.w) && y >= hitbox.y && y <= (hitbox.y + hitbox.h));
+}
+
+bool Vector2f::operator != (HitBox2d hitbox) {
+    return !(*this == hitbox);
+}
+
 Vector2d::Vector2d() :x(0), y(0) {}
 
 Vector2d::Vector2d(int px, int py) :x(px), y(py) {}
@@ -17,6 +25,16 @@ Vector2d::Vector2d(int px, int py) :x(px), y(py) {}
 void Vector2d::print() {
     cout << x << ", " << y << endl;
 }
+
+bool Vector2d::operator == (HitBox2d hitbox) {
+    return (x >= hitbox.x && x <= (hitbox.x + hitbox.w) && y >= hitbox.y && y <= (hitbox.y + hitbox.h));
+}
+
+bool Vector2d::operator != (HitBox2d hitbox) {
+    return !(*this == hitbox);
+}
+
+HitBox2d::HitBox2d(int px, int py, int pw, int ph) :x(px), y(py), w(pw), h(ph) {}
 
 Uint8 math::binstrToUint8(string s) {
     bool b;

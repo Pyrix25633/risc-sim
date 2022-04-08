@@ -389,6 +389,18 @@ class CentralProcessingUnit{
          * @brief Function that loads a word, from an address that is in a register, in a register
         */
         void ldwr();
+        /**
+         * @brief Function that loads a byte, that is after the instruction, in a register
+        */
+        void ldbi();
+        /**
+         * @brief Function that loads a byte, from an address that is after the instruction, in a register
+        */
+        void ldba();
+        /**
+         * @brief Function that loads a byte, from an address that is in a register, in a register
+        */
+        void ldbr();
 };
 
 class CentralMemory {
