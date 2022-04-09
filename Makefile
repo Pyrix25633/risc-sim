@@ -7,7 +7,6 @@ DEBUGFLAGS = -c src/*.cpp -std=c++14 -m64 -g -I include
 RELEASEFLAGS = -c src/*.cpp -std=c++14 -m64 -O3 -I include
 VERSION = 0.0.1
 NAME = risc-sim
-#INCLUDE =
 
 default:
 > make debug

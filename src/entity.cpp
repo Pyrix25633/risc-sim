@@ -153,3 +153,15 @@ TextEntity& TextEntity::operator += (Entity e) {
     this->textEntity.push_back(e);
     return *this;
 }
+
+Button::Button(Vector2f ppos,HitBox2d phitbox, SDL_Texture* ptexture)
+    :Entity(ppos, ptexture), hitbox(phitbox) {
+}
+
+void Button::action(void (*func)(int)) {
+    func(2);
+}
+
+HitBox2d* Button::getHitBox() {
+    return &hitbox;
+}

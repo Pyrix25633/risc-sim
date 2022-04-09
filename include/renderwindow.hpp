@@ -48,7 +48,12 @@ class RenderWindow {
          * @brief Function to render a text entity
          * @param textEntity The text entity to render, type TextEntity
         */
-        void renderText(TextEntity textEntity);
+        void renderText(TextEntity& textEntity);
+        /**
+         * @brief Function to render a button
+         * @param button The button to render, type Button
+        */
+        void renderButton(Button& button);
         /**
          * @brief Function to render the cursor
          * @param entity The cursor entity to render, type Entity

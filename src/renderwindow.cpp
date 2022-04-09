@@ -73,11 +73,26 @@ void RenderWindow::renderGui(Entity& entity) {
     SDL_RenderCopy(Renderer, entity.getTexture(), &src, &dst);
 }
 
-void RenderWindow::renderText(TextEntity textEntity) {
+void RenderWindow::renderText(TextEntity& textEntity) {
     vector<Entity>* p = textEntity.getTextEntity();
     for(Entity& e : *p) {
         renderGui(e);
     }
+}
+
+void RenderWindow::renderButton(Button& button) {
+    SDL_Rect src;
+    src.x = button.getCurrentFrame().x;
+    src.y = button.getCurrentFrame().y;
+    src.w = button.getCurrentFrame().w;
+    src.h = button.getCurrentFrame().h;
+    SDL_Rect dst;
+    dst.x = button.getPos().x * settings->win.scale * 4;
+    dst.y = button.getPos().y * settings->win.scale * 4;
+    dst.w = button.getCurrentFrame().w * settings->win.guiScale * 2;
+    dst.h = button.getCurrentFrame().h * settings->win.guiScale * 2;
+
+    SDL_RenderCopy(Renderer, button.getTexture(), &src, &dst);
 }
 
 void RenderWindow::renderCursor(Entity& entity) {

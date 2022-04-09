@@ -11,7 +11,7 @@ void Vector2f::print() {
 }
 
 bool Vector2f::operator == (HitBox2d hitbox) {
-    return (x >= hitbox.x && x <= (hitbox.x + hitbox.w) && y >= hitbox.y && y <= (hitbox.y + hitbox.h));
+    return (x >= hitbox.x && x < (hitbox.x + hitbox.w) && y >= hitbox.y && y < (hitbox.y + hitbox.h));
 }
 
 bool Vector2f::operator != (HitBox2d hitbox) {

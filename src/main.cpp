@@ -11,6 +11,10 @@
 
 using namespace std;
 
+void randFunc(int a) {
+    cout << "Here is a button action! " << a << endl;
+}
+
 int main(int argc, char* args[]) {
     //Variables
     Logger logger;
@@ -72,6 +76,7 @@ int main(int argc, char* args[]) {
     vector<Entity> cursorEntity = {Entity(Vector2f(0, 0), cursorTexture),
                                    Entity(Vector2f(0, 0), cursorHoverTexture)};
     TextEntity fpsCounterEntity(Vector2f(1, 1), fontTexture, &font);
+    Button button1(Vector2f(100, 100), HitBox2d(100, 100, 8, 8), grassBlockTexture);
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
     TextEntity someText(Vector2f(100, 200), fontTexture, &font);
@@ -117,10 +122,11 @@ int main(int argc, char* args[]) {
             SDL_GetMouseState(&cursorPosition.x, &cursorPosition.y);
             guiCursorPosition.x = (cursorPosition.x / settings.win.scale / 4);
             guiCursorPosition.y = (cursorPosition.y / settings.win.scale / 4);
-            for(HitBox2d h : hitboxes) {
-                if(guiCursorPosition == h) cursorState = 1;
-                else cursorState = 0;
+            if(guiCursorPosition == *button1.getHitBox()) {
+                cursorState = 1;
+                button1.action(randFunc);
             }
+            else cursorState = 0;
             cursorEntity[cursorState].setXY(cursorPosition.x, cursorPosition.y);
             Window.clear();
             for(Entity& p : platforms) {
@@ -131,6 +137,7 @@ int main(int argc, char* args[]) {
             }
             Window.renderText(someText);
             Window.renderText(textEntity);
+            Window.renderButton(button1);
             Window.renderCursor(cursorEntity[cursorState]);
             //Window.playSound();
             Window.display();

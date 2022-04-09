@@ -128,3 +128,21 @@ class TextEntity {
         Font* font;
         string text;
 };
+
+/**
+ * @brief Button Entity
+*/
+class Button :public Entity {
+    public:
+        /**
+         * @brief Constructor
+         * @param ppos Position
+         * @param phitbox Hitbox of the button
+         * @param ptexture Texture
+        */
+        Button(Vector2f ppos,HitBox2d phitbox, SDL_Texture* ptexture);
+        void action(void (*func)(int));
+        HitBox2d* getHitBox();
+    private:
+        HitBox2d hitbox;
+};
