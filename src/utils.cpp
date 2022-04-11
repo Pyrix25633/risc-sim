@@ -210,6 +210,22 @@ Font JsonManager::getFont() {
     return font;
 }
 
+Cursor JsonManager::getCursor() {
+    Cursor cursor;
+    ifstream file("res/img/font.json");
+    Value actualJson, letterValue;
+    Reader reader;
+    reader.parse(file, actualJson);
+    for(Uint16 i = 0; i < 4; i++) {
+        letterValue = actualJson[to_string(i)];
+        cursor.pointers[i].x = letterValue["x"].asInt();
+        cursor.pointers[i].y = letterValue["y"].asInt();
+        cursor.pointers[i].w = 16;
+        cursor.pointers[i].h = 16;
+    }
+    return cursor;
+}
+
 SystemBus::SystemBus() :AB(0x0), DB(0x0), CB(ControlBus()) {}
 
 void SystemBus::writeAddress(Uint16 a) {

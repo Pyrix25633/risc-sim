@@ -178,6 +178,14 @@ struct Font {
     SDL_Rect letters[128];
 };
 
+/**
+ * @brief Structure to contain the rect array for the cursor
+ * @param pointers[4] The array with all the cursor state pointers
+*/
+struct Cursor {
+    SDL_Rect pointers[4];
+};
+
 ostream& operator << (ostream& os, const Settings& settings);
 
 namespace JsonManager {
@@ -197,6 +205,11 @@ namespace JsonManager {
          * @return Returns the font rects, type Font
         */
         Font getFont();
+        /**
+         * @brief Function to get the rects for the cursor textures
+         * @return Returns the cursor rects, type Cursor
+        */
+        Cursor getCursor();
 };
 
 class SystemBus;

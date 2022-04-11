@@ -29,6 +29,7 @@ int main(int argc, char* args[]) {
     string fpsString = "000", fpsCounter, fpsText = "FPS:";
     Vector2d cursorPosition, guiCursorPosition;
     Uint8 cursorState; //0 -> normal, 1 -> hover
+    Cursor cursor = JsonManager::getCursor();
     vector<HitBox2d> hitboxes = {HitBox2d(0, 0, 10, 10), HitBox2d(0, 100, 16, 16)}; //Vector of all hitboxes
 
     //Interpreter
@@ -67,14 +68,12 @@ int main(int argc, char* args[]) {
 
     //Loading the textures
     SDL_Texture* cursorTexture = Window.loadTexture("res/img/cursor.png");
-    SDL_Texture* cursorHoverTexture = Window.loadTexture("res/img/cursor_hover.png");
     SDL_Texture* grassBlockTexture = Window.loadTexture("res/img/grass_block.png");
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
     vector<Entity> platforms = {Entity(Vector2f(0, 100), grassBlockTexture)/*,
                                 Entity(Vector2f(16, 100), grassBlockTexture),
                                 Entity(Vector2f(32, 100), grassBlockTexture)*/};
-    vector<Entity> cursorEntity = {Entity(Vector2f(0, 0), cursorTexture),
-                                   Entity(Vector2f(0, 0), cursorHoverTexture)};
+    Entity cursorEntity(Vector2f(0, 0), cursorTexture);
     TextEntity fpsCounterEntity(Vector2f(1, 1), fontTexture, &font);
     Button button1(Vector2f(100, 100), HitBox2d(100, 100, 8, 8), grassBlockTexture);
     fpsCounter = fpsText + fpsString;
@@ -117,6 +116,14 @@ int main(int argc, char* args[]) {
                     running = false;
                     cout << logger.getStringTime() << logger.info << "Game Windwow Closed" << logger.reset << endl;
                 }
+                else if(event.type == SDL_MOUSEBUTTONDOWN) {
+                    if(cursorState == 0) cursorState = 2;
+                    else if(cursorState == 1) cursorState = 3;
+                }
+                else if(event.type == SDL_MOUSEBUTTONUP) {
+                    if(cursorState == 2) cursorState = 0;
+                    else if(cursorState == 3) cursorState = 1;
+                }
             }
             //Actual game processing
             SDL_GetMouseState(&cursorPosition.x, &cursorPosition.y);
@@ -127,7 +134,8 @@ int main(int argc, char* args[]) {
                 button1.action(randFunc);
             }
             else cursorState = 0;
-            cursorEntity[cursorState].setXY(cursorPosition.x, cursorPosition.y);
+            cursorEntity.setXY(cursorPosition.x, cursorPosition.y);
+            cursorEntity.setCurrentFrame(cursor.pointers[cursorState]);
             Window.clear();
             for(Entity& p : platforms) {
                 Window.render(p);
@@ -138,7 +146,7 @@ int main(int argc, char* args[]) {
             Window.renderText(someText);
             Window.renderText(textEntity);
             Window.renderButton(button1);
-            Window.renderCursor(cursorEntity[cursorState]);
+            Window.renderCursor(cursorEntity);
             //Window.playSound();
             Window.display();
         }
