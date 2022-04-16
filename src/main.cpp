@@ -28,7 +28,7 @@ int main(int argc, char* args[]) {
     long int msNow, msNext = SDL_GetTicks();
     string fpsString = "000", fpsCounter, fpsText = "FPS:";
     Vector2d cursorPosition, guiCursorPosition;
-    Uint8 cursorState; //0 -> normal, 1 -> hover
+    Uint8 cursorState = 0; //0 -> normal, 1 -> hover, 2 -> normal clicked, 3 -> hover clicked
     Cursor cursor = JsonManager::getCursor();
     vector<HitBox2d> hitboxes = {HitBox2d(0, 0, 10, 10), HitBox2d(0, 100, 16, 16)}; //Vector of all hitboxes
 
@@ -39,7 +39,6 @@ int main(int argc, char* args[]) {
     CentralProcessingUnit CPU(&SB, &CM, &IOD, settings.interpreter.start);
     CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
     CPU.fetchInstruction();
-    cout << *(CPU.getIR()) << endl;
 
     //Capturing cout in log file
     if(settings.console.log) freopen("log.txt", "w", stdout);
@@ -78,14 +77,35 @@ int main(int argc, char* args[]) {
     Button button1(Vector2f(100, 100), HitBox2d(100, 100, 8, 8), grassBlockTexture);
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
-    TextEntity someText(Vector2f(100, 200), fontTexture, &font);
-    someText = "Contact: biral.mattia@gmail.com 32$ 50% #20";
-    TextEntity textEntity(Vector2f(10.0, 15.0), fontTexture, &font);
-    textEntity = "Test";
-    textEntity += " some text";
-    textEntity += platforms[0];
+    //CPU
+    TextEntity cpuTitle(Vector2f(16, 16), fontTexture, &font);
+    TextEntity pcTitle(Vector2f(24, 24), fontTexture, &font);
+    TextEntity irTitle(Vector2f(24, 32), fontTexture, &font);
+    TextEntity srTitle(Vector2f(24, 40), fontTexture, &font);
+    TextEntity arTitle(Vector2f(24, 48), fontTexture, &font);
+    TextEntity drTitle(Vector2f(24, 56), fontTexture, &font);
+    TextEntity spTitle(Vector2f(24, 64), fontTexture, &font);
+    TextEntity pcValue(Vector2f(32, 24), fontTexture, &font);
+    TextEntity irValue(Vector2f(32, 32), fontTexture, &font);
+    TextEntity srValue(Vector2f(32, 40), fontTexture, &font);
+    TextEntity arValue(Vector2f(32, 48), fontTexture, &font);
+    TextEntity drValue(Vector2f(32, 56), fontTexture, &font);
+    TextEntity spValue(Vector2f(32, 64), fontTexture, &font);
+    cpuTitle = "CPU";
+    pcTitle = "PC";
+    irTitle = "IR";
+    srTitle = "SR";
+    arTitle = "AR";
+    drTitle = "DR";
+    spTitle = "SP";
+    pcValue = "0x0000";
+    irValue = "0x0000";
+    srValue = "0000";
+    arValue = "0x0000";
+    drValue = "0x0000";
+    spValue = "0x0000";
 
-    //Running the game
+    //Running
     previousSecond = SDL_GetTicks() / 1000;
     while(running) {
         msNow = SDL_GetTicks();
@@ -102,7 +122,6 @@ int main(int argc, char* args[]) {
                 }
                 else {
                     previousSecond = msNow / 1000;
-                    //cout << logger.getStringTime() << "FPS: " << fps << endl;
                     fpsString = to_string(fps);
                     fpsCounter = fpsText + fpsString;
                     fpsCounterEntity = fpsCounter;
@@ -125,7 +144,7 @@ int main(int argc, char* args[]) {
                     else if(cursorState == 3) cursorState = 1;
                 }
             }
-            //Actual game processing
+            //Actual processing
             SDL_GetMouseState(&cursorPosition.x, &cursorPosition.y);
             guiCursorPosition.x = (cursorPosition.x / settings.win.scale / 4);
             guiCursorPosition.y = (cursorPosition.y / settings.win.scale / 4);
@@ -133,7 +152,7 @@ int main(int argc, char* args[]) {
                 cursorState = 1;
                 button1.action(randFunc);
             }
-            else cursorState = 0;
+            else if(cursorState == 1) cursorState = 0;
             cursorEntity.setXY(cursorPosition.x, cursorPosition.y);
             cursorEntity.setCurrentFrame(cursor.pointers[cursorState]);
             Window.clear();
@@ -143,11 +162,31 @@ int main(int argc, char* args[]) {
             if(settings.win.fpsCounter) {
                 Window.renderText(fpsCounterEntity);
             }
-            Window.renderText(someText);
-            Window.renderText(textEntity);
+
+            //CPU Values
+            pcValue = "0x" + math::Uint16Tohexstr(CPU.getPC());
+            irValue = "0x" + math::Uint16Tohexstr(CPU.getIR());
+            srValue = math::StatusRegisterToHexstr(CPU.getSR());
+            arValue = "0x" + math::Uint16Tohexstr(CPU.getAR());
+            drValue = "0x" + math::Uint16Tohexstr(CPU.getDR());
+            spValue = "0x" + math::Uint16Tohexstr(CPU.getSP());
+            //CPU Render
+            Window.renderText(cpuTitle);
+            Window.renderText(pcTitle);
+            Window.renderText(irTitle);
+            Window.renderText(srTitle);
+            Window.renderText(arTitle);
+            Window.renderText(drTitle);
+            Window.renderText(spTitle);
+            Window.renderText(pcValue);
+            Window.renderText(irValue);
+            Window.renderText(srValue);
+            Window.renderText(arValue);
+            Window.renderText(drValue);
+            Window.renderText(spValue);
+
             Window.renderButton(button1);
             Window.renderCursor(cursorEntity);
-            //Window.playSound();
             Window.display();
         }
     }

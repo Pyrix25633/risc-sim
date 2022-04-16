@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "utils.hpp"
+struct StatusRegister;
 
 using namespace std;
 
@@ -108,4 +109,22 @@ namespace math {
      * @returns The number, type Uint8
     */
     Uint8 hexstrToUint8(string s);
+    /**
+     * @brief Function to get the hexadecimal string from a number
+     * @param n The number, type Uint8
+     * @returns The hexadecimal string
+    */
+    string Uint8Tohexstr(Uint8 n);
+    /**
+     * @brief Function to get the hexadecimal string from a number
+     * @param n The number, type Uint16
+     * @returns The hexadecimal string
+    */
+    string Uint16Tohexstr(Uint16 n);
+    /**
+     * @brief Function to get the hex string from the Status Register
+     * @param sr The Status Register
+     * @return The hex string
+    */
+    string StatusRegisterToHexstr(StatusRegister sr);
 }

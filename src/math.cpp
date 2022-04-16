@@ -67,3 +67,44 @@ Uint8 math::hexstrToUint8(string s) {
     }
     return n;
 }
+
+string math::Uint8Tohexstr(Uint8 n) {
+    Uint8 m;
+    char s[2];
+    for(Int8 i = 1; i >= 0; i--) {
+        m = n % 16;
+        if(m < 10) {
+            s[i] = m + 48;
+        }
+        else {
+            s[i] = m + 55;
+        }
+        n /= 16;
+    }
+    return s;
+}
+
+string math::Uint16Tohexstr(Uint16 n) {
+    Uint8 m;
+    char s[4];
+    for(Int8 i = 3; i >= 0; i--) {
+        m = n % 16;
+        if(m < 10) {
+            s[i] = m + 48;
+        }
+        else {
+            s[i] = m + 55;
+        }
+        n /= 16;
+    }
+    return s;
+}
+
+string math::StatusRegisterToHexstr(StatusRegister sr) {
+    char s[4];
+    s[0] = ((sr.Z) ? '1' : '0');
+    s[1] = ((sr.N) ? '1' : '0');
+    s[2] = ((sr.C) ? '1' : '0');
+    s[3] = ((sr.V) ? '1' : '0');
+    return s;
+}

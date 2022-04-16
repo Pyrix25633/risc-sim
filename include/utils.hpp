@@ -376,8 +376,36 @@ class CentralProcessingUnit{
         void decodeInstruction();
         void fetchOperand();
         void executeInstruction();
-        StatusRegister* getSR();
-        Uint16* getIR();
+        /**
+         * @brief Function to get the Program Counter value
+         * @returns The program counter value
+        */
+        Uint16 getPC();
+        /**
+         * @brief Function to get the Instruction Register value
+         * @returns The instruction register value
+        */
+        Uint16 getIR();
+        /**
+         * @brief Function to get the Status Register value
+         * @returns The status register value
+        */
+        StatusRegister getSR();
+        /**
+         * @brief Function to get the Address Register value
+         * @returns The adress register value
+        */
+        Uint16 getAR();
+        /**
+         * @brief Function to get the Data Register value
+         * @returns The data register value
+        */
+        Uint16 getDR();
+        /**
+         * @brief Function to get the Stack Pointer value
+         * @returns The stack pointer value
+        */
+        Uint16 getSP();
     private:
         Uint16 PC; //Program Counter
         Uint16 SP; //Stack Pointer

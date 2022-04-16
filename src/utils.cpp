@@ -212,7 +212,7 @@ Font JsonManager::getFont() {
 
 Cursor JsonManager::getCursor() {
     Cursor cursor;
-    ifstream file("res/img/font.json");
+    ifstream file("res/img/cursor.json");
     Value actualJson, letterValue;
     Reader reader;
     reader.parse(file, actualJson);
@@ -420,8 +420,28 @@ void CentralProcessingUnit::decodeInstruction() {
     }
 }
 
-Uint16* CentralProcessingUnit::getIR() {
-    return &IR;
+Uint16 CentralProcessingUnit::getPC() {
+    return PC;
+}
+
+Uint16 CentralProcessingUnit::getIR() {
+    return IR;
+}
+
+StatusRegister CentralProcessingUnit::getSR() {
+    return SR;
+}
+
+Uint16 CentralProcessingUnit::getAR() {
+    return AR;
+}
+
+Uint16 CentralProcessingUnit::getDR() {
+    return DR;
+}
+
+Uint16 CentralProcessingUnit::getSP() {
+    return SP;
 }
 
 void CentralProcessingUnit::ldwa() {
@@ -510,10 +530,10 @@ CentralMemory::CentralMemory(SystemBus* pSB, Uint16 psize) :SB(pSB), size(psize)
 }
 
 void CentralMemory::loadProgram(string path, bool bin, Logger* logger) {
-    ifstream file(path);
+    ifstream file("binaries/" + path);
     if(!file) {
-        return;
         cout << logger->warning << "File " << path << " does not exist!" << logger->reset << endl;
+        return;        
     }
     if(bin) {
         char s[9];
