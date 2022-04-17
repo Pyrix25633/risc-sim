@@ -18,6 +18,14 @@ class Entity {
         */
         Entity(Vector2f ppos, SDL_Texture* ptexture);
         /**
+         * @brief Constructor
+         * @param ppos Position of the entity on the screen, type Vector2f
+         * @param ptexture The texture for the entity, type SDL_Texture*
+         * @param h Height
+         * @param w Width
+        */
+        Entity(Vector2f ppos, SDL_Texture* ptexture, Uint8 h, Uint8 w);
+        /**
          * @brief Function to get the position of the entity
          * @return The position, type Vector2f
         */
@@ -58,7 +66,7 @@ class Entity {
          * @param rect The frame, type SDL_Rect
         */
         void setCurrentFrame(SDL_Rect rect);
-    private:
+    protected:
         Vector2f pos;
         SDL_Rect currentFrame;
         SDL_Texture* texture;
@@ -145,11 +153,11 @@ class Button :public Entity {
         /**
          * @brief Function to switch the current texture with the normal one 
         */
-        void normal();
+        void changeNormal();
         /**
          * @brief Function to switch the current tecture with the pressed one
         */
-        void pressed();
+        void changePressed();
         /**
          * @brief Function to get the HitBox
          * @returns The hitbox pointer

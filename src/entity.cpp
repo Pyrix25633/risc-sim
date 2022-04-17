@@ -11,6 +11,13 @@ Entity::Entity(Vector2f ppos, SDL_Texture* ptexture) :pos(ppos), texture(ptextur
     currentFrame.h = 16;
 }
 
+Entity::Entity(Vector2f ppos, SDL_Texture* ptexture, Uint8 h, Uint8 w) :pos(ppos), texture(ptexture) {
+    currentFrame.x = 0;
+    currentFrame.y = 0;
+    currentFrame.w = w;
+    currentFrame.h = h;
+}
+
 Vector2f& Entity::getPos() {
     return pos;
 }
@@ -161,7 +168,12 @@ void Button::action(void (*func)(int)) {
     func(2);
 }
 
-void Button::normal() {
+void Button::changeNormal() {
+    texture = normal;
+}
+
+void Button::changePressed() {
+    texture = pressed;
 }
 
 HitBox2d* Button::getHitBox() {

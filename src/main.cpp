@@ -70,18 +70,36 @@ int main(int argc, char* args[]) {
     //Loading the textures
     SDL_Texture* cursorTexture = Window.loadTexture("res/img/cursor.png");
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
+    SDL_Texture* progressBarTexture = Window.loadTexture("res/img/progress_bar.png");
+    SDL_Texture* progressBarNowTexture = Window.loadTexture("res/img/progress_bar_now.png");
+    SDL_Texture* progressBarNextTexture = Window.loadTexture("res/img/progress_bar_next.png");
+    SDL_Texture* progressBarAllTexture = Window.loadTexture("res/img/progress_bar_all.png");
     SDL_Texture* fastTexture = Window.loadTexture("res/img/fast_button.png");
     SDL_Texture* playTexture = Window.loadTexture("res/img/play_button.png");
     SDL_Texture* nextTexture = Window.loadTexture("res/img/next_button.png");
     SDL_Texture* pauseTexture = Window.loadTexture("res/img/pause_button.png");
     SDL_Texture* stopTexture = Window.loadTexture("res/img/stop_button.png");
+    SDL_Texture* fastPressedTexture = Window.loadTexture("res/img/fast_button_pressed.png");
+    SDL_Texture* playPressedTexture = Window.loadTexture("res/img/play_button_pressed.png");
+    SDL_Texture* nextPressedTexture = Window.loadTexture("res/img/next_button_pressed.png");
+    SDL_Texture* pausePressedTexture = Window.loadTexture("res/img/pause_button_pressed.png");
+    SDL_Texture* stopPressedTexture = Window.loadTexture("res/img/stop_button_pressed.png");
     Entity cursorEntity(Vector2f(0, 0), cursorTexture);
     TextEntity fpsCounterEntity(Vector2f(1, 1), fontTexture, &font);
-    Button fastButton(Vector2f(211, 1), HitBox2d(211, 1, 7, 7), fastTexture);
-    Button playButton(Vector2f(220, 1), HitBox2d(220, 1, 7, 7), playTexture);
-    Button nextButton(Vector2f(229, 1), HitBox2d(229, 1, 7, 7), nextTexture);
-    Button pauseButton(Vector2f(238, 1), HitBox2d(238, 1, 7, 7), pauseTexture);
-    Button stopButton(Vector2f(247, 1), HitBox2d(247, 1, 7, 7), stopTexture);
+    //Progress bar
+    TextEntity progressBarIfTitle(Vector2f(178, 1), fontTexture, &font);
+    TextEntity progressBarIdTitle(Vector2f(186, 1), fontTexture, &font);
+    TextEntity progressBarOfTitle(Vector2f(194, 1), fontTexture, &font);
+    TextEntity progressBarIeTitle(Vector2f(202, 1), fontTexture, &font);
+    Entity progressBarEntity(Vector2f(178, 4), progressBarTexture, 16, 64);
+    Entity progressBarNowEntity(Vector2f(178, 4), progressBarNowTexture);
+    Entity progressBarNextEntity(Vector2f(186, 4), progressBarNextTexture);
+    //Buttons
+    Button fastButton(Vector2f(211, 1), HitBox2d(211, 1, 7, 7), fastTexture, fastPressedTexture);
+    Button playButton(Vector2f(220, 1), HitBox2d(220, 1, 7, 7), playTexture, playPressedTexture);
+    Button nextButton(Vector2f(229, 1), HitBox2d(229, 1, 7, 7), nextTexture, nextPressedTexture);
+    Button pauseButton(Vector2f(238, 1), HitBox2d(238, 1, 7, 7), pauseTexture, pausePressedTexture);
+    Button stopButton(Vector2f(247, 1), HitBox2d(247, 1, 7, 7), stopTexture, stopPressedTexture);
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
     //CPU
@@ -98,6 +116,10 @@ int main(int argc, char* args[]) {
     TextEntity arValue(Vector2f(32, 48), fontTexture, &font);
     TextEntity drValue(Vector2f(32, 56), fontTexture, &font);
     TextEntity spValue(Vector2f(32, 64), fontTexture, &font);
+    progressBarIfTitle = "IF";
+    progressBarIdTitle = "ID";
+    progressBarOfTitle = "OF";
+    progressBarIeTitle = "IE";
     cpuTitle = "CPU";
     pcTitle = "PC";
     irTitle = "IR";
@@ -144,13 +166,11 @@ int main(int argc, char* args[]) {
                     cout << logger.getStringTime() << logger.info << "Game Windwow Closed" << logger.reset << endl;
                 }
                 else if(event.type == SDL_MOUSEBUTTONDOWN) {
-                    if(cursorState == 0) cursorState = 2;
-                    else if(cursorState == 1) cursorState = 3;
+                    if(cursorState == 0 || cursorState == 1) cursorState += 2;
                     clicked = true;
                 }
                 else if(event.type == SDL_MOUSEBUTTONUP) {
-                    if(cursorState == 2) cursorState = 0;
-                    else if(cursorState == 3) cursorState = 1;
+                    if(cursorState == 2 || cursorState == 3) cursorState -= 2;
                 }
             }
             //Actual processing
@@ -159,19 +179,29 @@ int main(int argc, char* args[]) {
             guiCursorPosition.y = (cursorPosition.y / settings.win.scale / 4);
             inHitboxes = 0;
             if(guiCursorPosition == *fastButton.getHitBox()) {
+                if(cursorState >= 2) fastButton.changePressed();
+                else fastButton.changeNormal();
                 inHitboxes++;
             }
             if(guiCursorPosition == *playButton.getHitBox()) {
+                if(cursorState >= 2) playButton.changePressed();
+                else playButton.changeNormal();
                 inHitboxes++;
                 if(clicked) playButton.action(randFunc);
             }
             if(guiCursorPosition == *nextButton.getHitBox()) {
+                if(cursorState >= 2) nextButton.changePressed();
+                else nextButton.changeNormal();
                 inHitboxes++;
             }
             if(guiCursorPosition == *pauseButton.getHitBox()) {
+                if(cursorState >= 2) pauseButton.changePressed();
+                else pauseButton.changeNormal();
                 inHitboxes++;
             }
             if(guiCursorPosition == *stopButton.getHitBox()) {
+                if(cursorState >= 2) stopButton.changePressed();
+                else stopButton.changeNormal();
                 inHitboxes++;
             }
             if(inHitboxes > 0) {
@@ -210,6 +240,14 @@ int main(int argc, char* args[]) {
             Window.renderText(arValue);
             Window.renderText(drValue);
             Window.renderText(spValue);
+            //Porgress bar
+            Window.renderText(progressBarIfTitle);
+            Window.renderText(progressBarIdTitle);
+            Window.renderText(progressBarOfTitle);
+            Window.renderText(progressBarIeTitle);
+            Window.renderGui(progressBarEntity);
+            Window.renderGui(progressBarNowEntity);
+            Window.renderGui(progressBarNextEntity);
             //Buttons
             Window.renderButton(fastButton);
             Window.renderButton(playButton);

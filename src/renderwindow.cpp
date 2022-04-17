@@ -21,7 +21,7 @@ RenderWindow::RenderWindow(const char* title, int width, int height, Uint32 flag
     }
     //Initializing the Renderer
     Renderer = SDL_CreateRenderer(Window, -1, flags);
-    SDL_SetRenderDrawColor(Renderer, 40, 40, 40, 255);
+    SDL_SetRenderDrawColor(Renderer, 50, 50, 50, 255);
 }
 
 SDL_Texture* RenderWindow::loadTexture(const char* filePath) {
