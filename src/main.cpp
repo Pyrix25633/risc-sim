@@ -31,6 +31,8 @@ int main(int argc, char* args[]) {
     Uint8 cursorState = 0; //0 -> normal, 1 -> hover, 2 -> normal clicked, 3 -> hover clicked
     Cursor cursor = JsonManager::getCursor();
     vector<HitBox2d> hitboxes = {HitBox2d(0, 0, 10, 10), HitBox2d(0, 100, 16, 16)}; //Vector of all hitboxes
+    Uint8 inHitboxes = 0;
+    bool clicked = false;
 
     //Interpreter
     SystemBus SB;
@@ -67,14 +69,15 @@ int main(int argc, char* args[]) {
 
     //Loading the textures
     SDL_Texture* cursorTexture = Window.loadTexture("res/img/cursor.png");
-    SDL_Texture* grassBlockTexture = Window.loadTexture("res/img/grass_block.png");
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
-    vector<Entity> platforms = {Entity(Vector2f(0, 100), grassBlockTexture)/*,
-                                Entity(Vector2f(16, 100), grassBlockTexture),
-                                Entity(Vector2f(32, 100), grassBlockTexture)*/};
+    SDL_Texture* playTexture = Window.loadTexture("res/img/play_button.png");
+    SDL_Texture* nextTexture = Window.loadTexture("res/img/next_button.png");
+    SDL_Texture* pauseTexture = Window.loadTexture("res/img/pause_button.png");
     Entity cursorEntity(Vector2f(0, 0), cursorTexture);
     TextEntity fpsCounterEntity(Vector2f(1, 1), fontTexture, &font);
-    Button button1(Vector2f(100, 100), HitBox2d(100, 100, 8, 8), grassBlockTexture);
+    Button playButton(Vector2f(229, 1), HitBox2d(229, 1, 7, 7), playTexture);
+    Button nextButton(Vector2f(238, 1), HitBox2d(238, 1, 7, 7), nextTexture);
+    Button pauseButton(Vector2f(247, 1), HitBox2d(247, 1, 7, 7), pauseTexture);
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
     //CPU
@@ -129,6 +132,7 @@ int main(int argc, char* args[]) {
                 }
             }
             msNext = msNow + msStep;
+            clicked = false;
             //Controls
             while(SDL_PollEvent(&event)) {
                 if(event.type == SDL_QUIT) {
@@ -138,6 +142,7 @@ int main(int argc, char* args[]) {
                 else if(event.type == SDL_MOUSEBUTTONDOWN) {
                     if(cursorState == 0) cursorState = 2;
                     else if(cursorState == 1) cursorState = 3;
+                    clicked = true;
                 }
                 else if(event.type == SDL_MOUSEBUTTONUP) {
                     if(cursorState == 2) cursorState = 0;
@@ -148,17 +153,28 @@ int main(int argc, char* args[]) {
             SDL_GetMouseState(&cursorPosition.x, &cursorPosition.y);
             guiCursorPosition.x = (cursorPosition.x / settings.win.scale / 4);
             guiCursorPosition.y = (cursorPosition.y / settings.win.scale / 4);
-            if(guiCursorPosition == *button1.getHitBox()) {
-                cursorState = 1;
-                button1.action(randFunc);
+            inHitboxes = 0;
+            if(guiCursorPosition == *playButton.getHitBox()) {
+                inHitboxes++;
+                if(clicked) playButton.action(randFunc);
             }
-            else if(cursorState == 1) cursorState = 0;
+            if(guiCursorPosition == *nextButton.getHitBox()) {
+                inHitboxes++;
+            }
+            if(guiCursorPosition == *pauseButton.getHitBox()) {
+                inHitboxes++;
+            }
+            if(inHitboxes > 0) {
+                if(cursorState == 0) cursorState = 1;
+                else if(cursorState == 2) cursorState = 3;
+            }
+            else {
+                if(cursorState == 1) cursorState = 0;
+                else if(cursorState == 3) cursorState = 2;
+            }
             cursorEntity.setXY(cursorPosition.x, cursorPosition.y);
             cursorEntity.setCurrentFrame(cursor.pointers[cursorState]);
             Window.clear();
-            for(Entity& p : platforms) {
-                Window.render(p);
-            }
             if(settings.win.fpsCounter) {
                 Window.renderText(fpsCounterEntity);
             }
@@ -184,8 +200,10 @@ int main(int argc, char* args[]) {
             Window.renderText(arValue);
             Window.renderText(drValue);
             Window.renderText(spValue);
-
-            Window.renderButton(button1);
+            //Buttons
+            Window.renderButton(playButton);
+            Window.renderButton(nextButton);
+            Window.renderButton(pauseButton);
             Window.renderCursor(cursorEntity);
             Window.display();
         }

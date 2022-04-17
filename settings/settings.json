@@ -9,8 +9,8 @@
 	{
 		"fps_counter" : true,
 		"gui_scale" : 1,
-		"height" : 500,
-		"max_framerate" : 120,
+		"height" : 512,
+		"max_framerate" : 60,
 		"renderer_flags" : 
 		{
 			"gpu_acceleration" : true,
@@ -19,7 +19,7 @@
 			"vsync" : false
 		},
 		"scale" : 1,
-		"width" : 1000
+		"width" : 1024
 	},
 	"console" : 
 	{
