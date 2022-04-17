@@ -140,9 +140,23 @@ class Button :public Entity {
          * @param phitbox Hitbox of the button
          * @param ptexture Texture
         */
-        Button(Vector2f ppos,HitBox2d phitbox, SDL_Texture* ptexture);
+        Button(Vector2f ppos, HitBox2d phitbox, SDL_Texture* pnormal, SDL_Texture* ppressed);
         void action(void (*func)(int));
+        /**
+         * @brief Function to switch the current texture with the normal one 
+        */
+        void normal();
+        /**
+         * @brief Function to switch the current tecture with the pressed one
+        */
+        void pressed();
+        /**
+         * @brief Function to get the HitBox
+         * @returns The hitbox pointer
+        */
         HitBox2d* getHitBox();
     private:
         HitBox2d hitbox;
+        SDL_Texture* normal;
+        SDL_Texture* pressed;
 };

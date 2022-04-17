@@ -70,14 +70,18 @@ int main(int argc, char* args[]) {
     //Loading the textures
     SDL_Texture* cursorTexture = Window.loadTexture("res/img/cursor.png");
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
+    SDL_Texture* fastTexture = Window.loadTexture("res/img/fast_button.png");
     SDL_Texture* playTexture = Window.loadTexture("res/img/play_button.png");
     SDL_Texture* nextTexture = Window.loadTexture("res/img/next_button.png");
     SDL_Texture* pauseTexture = Window.loadTexture("res/img/pause_button.png");
+    SDL_Texture* stopTexture = Window.loadTexture("res/img/stop_button.png");
     Entity cursorEntity(Vector2f(0, 0), cursorTexture);
     TextEntity fpsCounterEntity(Vector2f(1, 1), fontTexture, &font);
-    Button playButton(Vector2f(229, 1), HitBox2d(229, 1, 7, 7), playTexture);
-    Button nextButton(Vector2f(238, 1), HitBox2d(238, 1, 7, 7), nextTexture);
-    Button pauseButton(Vector2f(247, 1), HitBox2d(247, 1, 7, 7), pauseTexture);
+    Button fastButton(Vector2f(211, 1), HitBox2d(211, 1, 7, 7), fastTexture);
+    Button playButton(Vector2f(220, 1), HitBox2d(220, 1, 7, 7), playTexture);
+    Button nextButton(Vector2f(229, 1), HitBox2d(229, 1, 7, 7), nextTexture);
+    Button pauseButton(Vector2f(238, 1), HitBox2d(238, 1, 7, 7), pauseTexture);
+    Button stopButton(Vector2f(247, 1), HitBox2d(247, 1, 7, 7), stopTexture);
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
     //CPU
@@ -154,6 +158,9 @@ int main(int argc, char* args[]) {
             guiCursorPosition.x = (cursorPosition.x / settings.win.scale / 4);
             guiCursorPosition.y = (cursorPosition.y / settings.win.scale / 4);
             inHitboxes = 0;
+            if(guiCursorPosition == *fastButton.getHitBox()) {
+                inHitboxes++;
+            }
             if(guiCursorPosition == *playButton.getHitBox()) {
                 inHitboxes++;
                 if(clicked) playButton.action(randFunc);
@@ -162,6 +169,9 @@ int main(int argc, char* args[]) {
                 inHitboxes++;
             }
             if(guiCursorPosition == *pauseButton.getHitBox()) {
+                inHitboxes++;
+            }
+            if(guiCursorPosition == *stopButton.getHitBox()) {
                 inHitboxes++;
             }
             if(inHitboxes > 0) {
@@ -201,9 +211,11 @@ int main(int argc, char* args[]) {
             Window.renderText(drValue);
             Window.renderText(spValue);
             //Buttons
+            Window.renderButton(fastButton);
             Window.renderButton(playButton);
             Window.renderButton(nextButton);
             Window.renderButton(pauseButton);
+            Window.renderButton(stopButton);
             Window.renderCursor(cursorEntity);
             Window.display();
         }

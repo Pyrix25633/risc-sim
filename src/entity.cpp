@@ -154,12 +154,14 @@ TextEntity& TextEntity::operator += (Entity e) {
     return *this;
 }
 
-Button::Button(Vector2f ppos,HitBox2d phitbox, SDL_Texture* ptexture)
-    :Entity(ppos, ptexture), hitbox(phitbox) {
-}
+Button::Button(Vector2f ppos, HitBox2d phitbox, SDL_Texture* pnormal, SDL_Texture* ppressed)
+    :Entity(ppos, pnormal), hitbox(phitbox), normal(pnormal), pressed(ppressed) {}
 
 void Button::action(void (*func)(int)) {
     func(2);
+}
+
+void Button::normal() {
 }
 
 HitBox2d* Button::getHitBox() {
