@@ -41,6 +41,7 @@ int main(int argc, char* args[]) {
     CentralProcessingUnit CPU(&SB, &CM, &IOD, settings.interpreter.start);
     CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
     CPU.fetchInstruction();
+    CPU.decodeInstruction();
 
     //Capturing cout in log file
     if(settings.console.log) freopen("log.txt", "w", stdout);
@@ -86,6 +87,9 @@ int main(int argc, char* args[]) {
     SDL_Texture* stopPressedTexture = Window.loadTexture("res/img/stop_button_pressed.png");
     Entity cursorEntity(Vector2f(0, 0), cursorTexture);
     TextEntity fpsCounterEntity(Vector2f(1, 1), fontTexture, &font);
+    //Instruction name
+    TextEntity instNameTitle(Vector2f(32, 1), fontTexture, &font);
+    TextEntity instNameValue(Vector2f(84, 1), fontTexture, &font);
     //Progress bar
     TextEntity progressBarIfTitle(Vector2f(178, 1), fontTexture, &font);
     TextEntity progressBarIdTitle(Vector2f(186, 1), fontTexture, &font);
@@ -116,6 +120,15 @@ int main(int argc, char* args[]) {
     TextEntity arValue(Vector2f(32, 48), fontTexture, &font);
     TextEntity drValue(Vector2f(32, 56), fontTexture, &font);
     TextEntity spValue(Vector2f(32, 64), fontTexture, &font);
+    vector<TextEntity> registriesTitles;
+    for(Uint8 i = 0; i <= 0xF; i++) {
+        registriesTitles.push_back(TextEntity(Vector2f(64, 24 + 8 * i), fontTexture, &font));
+        string s = "!";
+        s[0] = ((i < 0xA) ? (i + 48) : (i + 55));
+        registriesTitles[i] = "R" + s;
+    }
+    instNameTitle = "Instruction name:";
+    instNameValue = "-----";
     progressBarIfTitle = "IF";
     progressBarIdTitle = "ID";
     progressBarOfTitle = "OF";
@@ -218,7 +231,8 @@ int main(int argc, char* args[]) {
             if(settings.win.fpsCounter) {
                 Window.renderText(fpsCounterEntity);
             }
-
+            
+            instNameValue = CPU.getInstName();
             //CPU Values
             pcValue = "0x" + math::Uint16Tohexstr(CPU.getPC());
             irValue = "0x" + math::Uint16Tohexstr(CPU.getIR());
@@ -240,7 +254,13 @@ int main(int argc, char* args[]) {
             Window.renderText(arValue);
             Window.renderText(drValue);
             Window.renderText(spValue);
-            //Porgress bar
+            for(TextEntity e : registriesTitles) {
+                Window.renderText(e);
+            }
+            //Instruction name
+            Window.renderText(instNameTitle);
+            Window.renderText(instNameValue);
+            //Progress bar
             Window.renderText(progressBarIfTitle);
             Window.renderText(progressBarIdTitle);
             Window.renderText(progressBarOfTitle);

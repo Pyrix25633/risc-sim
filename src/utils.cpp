@@ -15,7 +15,7 @@ void ControlBus::reset() {
     W = BYTE;
 }
 
-Instruction::Instruction() :group(0), addressing(0), opcode(0), r1(0), r2(0), offset(0) {}
+Instruction::Instruction() :group(0), addressing(0), opcode(0), ra(0), rb(0), offset(0) {}
 
 StatusRegister::StatusRegister() :Z(false), C(false), N(false), V(false) {}
 
@@ -405,6 +405,8 @@ void CentralProcessingUnit::fetchInstruction() {
     CM->operate();
     IR = SB->readData();
     PC += 2;
+    instName = "-----";
+    phaseNow = 0, phaseNext = 1;
 }
 
 void CentralProcessingUnit::decodeInstruction() {
@@ -415,9 +417,199 @@ void CentralProcessingUnit::decodeInstruction() {
         I.offset = (IR & 0x00FF);
     }
     else {
-        I.r1 = (IR & 0x00F0) >> 4;
-        I.r2 = (IR & 0x000F);
+        I.ra = (IR & 0x00F0) >> 4;
+        I.rb = (IR & 0x000F);
     }
+    instName = decodeInstName();
+    phaseNow = 1;
+    phaseNext = ((I.addressing > 0) ? 2 : 3);
+}
+
+void CentralProcessingUnit::fetchOperand() {
+    switch(I.addressing) {
+        case 0x1: //LD$I
+            AR = PC;
+            SB->writeAddress(AR);
+            SB->writeControl(ControlBus(READ, MEMORY, WORD));
+            CM->operate();
+            break;
+        case 0x2: //LD$A
+            AR = PC;
+            SB->writeAddress(AR);
+            SB->writeControl(ControlBus(READ, MEMORY, WORD));
+            CM->operate();
+            SB->writeAddress(SB->readData());
+            SB->writeControl(ControlBus(READ, MEMORY, WORD));
+            CM->operate();
+            break;
+        case 0x3: //LD$R
+            AR = ALU.get(I.rb);
+            SB->writeAddress(AR);
+            SB->writeControl(ControlBus(READ, MEMORY, WORD));
+            CM->operate();
+    }
+    phaseNow = 2;
+    phaseNext = 3;
+}
+
+void CentralProcessingUnit::executeInstruction() {
+    switch(I.group) {
+        case 0x0: //Data transfer group
+            switch(I.addressing) {
+                case 0x0:
+                    switch(I.opcode) {
+                        case 0x4:
+                            break;
+                        case 0x8:
+                            break;
+                        case 0x9:
+                            break;
+                        case 0xD:
+                            break;
+                        case 0xE:
+                            break;
+                        default:
+                            phaseNext = 0xFF;
+                    }
+                    break;
+                case 0x1:
+                    switch(I.opcode) {
+                        case 0x0:
+                            ldwi();
+                            break;
+                        case 0x1:
+                            ldbi();
+                            break;
+                        default:
+                            phaseNext = 0xFF;
+                    }
+                    break;
+                case 0x2:
+                    switch(I.opcode) {
+                        case 0x0:
+                            ldwa();
+                            break;
+                        case 0x1:
+                            ldba();
+                            break;
+                        case 0x2:
+                            break;
+                        case 0x3:
+                            break;
+                        default:
+                            phaseNext = 0xFF;
+                    }
+                    break;
+                case 0x3:
+                    switch(I.opcode) {
+                        case 0x0:
+                            ldwr();
+                            break;
+                        case 0x1:
+                            ldbr();
+                            break;
+                        case 0x2:
+                            break;
+                        case 0x3:
+                            break;
+                        default:
+                            phaseNext = 0xFF;
+                    }
+            }
+            break;
+        case 0x1: //Arithmetic-logic group
+            if(I.addressing != 0x0) {
+                phaseNext = 0xFF;
+            }
+            switch(I.opcode) {
+                case 0x0:
+                    ALU.add(I.rb, I.ra);
+                    break;
+                case 0x1:
+                    ALU.sub(I.rb, I.ra);
+                    break;
+                case 0x2:
+                    ALU.bNot(I.ra);
+                    break;
+                case 0x3:
+                    ALU.bAnd(I.rb, I.ra);
+                    break;
+                case 0x4:
+                    ALU.bOr(I.rb, I.ra);
+                    break;
+                case 0x5:
+                    ALU.bXor(I.rb, I.ra);
+                    break;
+                case 0x8:
+                    ALU.inc(I.ra);
+                    break;
+                case 0x9:
+                    ALU.dec(I.ra);
+                    break;
+                case 0xA:
+                    ALU.lShift(I.ra);
+                    break;
+                case 0xB:
+                    ALU.rShift(I.ra);
+                    break;
+                default:
+                    phaseNext = 0xFF;
+            }
+            break;
+        case 0x2: //Input/output group
+            if(I.addressing != 0x0) {
+                phaseNext = 0xFF;
+            }
+            switch(I.opcode) {
+                case 0x0:
+                    break;
+                case 0x1:
+                    break;
+                case 0x2:
+                    break;
+                case 0x3:
+                    break;
+                case 0x4:
+                    break;
+                case 0x5:
+                    break;
+                default:
+                    phaseNext = 0xFF;
+            }
+            break;
+        case 0x3: //Control group
+            if(I.addressing != 0x0) {
+                phaseNext = 0xFF;
+            }
+            switch (I.opcode) {
+                case 0x0:
+                    break;
+                case 0x1:
+                    break;
+                case 0x2:
+                    break;
+                case 0x3:
+                    break;
+                case 0x4:
+                    break;
+                case 0x5:
+                    break;
+                case 0x6:
+                    break;
+                case 0x7:
+                    break;
+                case 0x8:
+                    break;
+                case 0x9:
+                    break;
+                case 0xF:
+                    break;
+                default:
+                    phaseNext = 0xFF;
+            }
+    }
+    phaseNow = 3;
+    phaseNext = 0;
 }
 
 Uint16 CentralProcessingUnit::getPC() {
@@ -444,82 +636,203 @@ Uint16 CentralProcessingUnit::getSP() {
     return SP;
 }
 
-void CentralProcessingUnit::ldwa() {
-    Uint16 data;
-    AR = PC;
-    SB->writeAddress(AR);
-    SB->writeControl(ControlBus(READ, MEMORY, WORD));
-    CM->operate();
-    data = SB->readData();
-    ALU.load(I.r1, data);
-    SR.Z = (data == 0);
-    SR.N = Int16(data) < 0;
-    PC += 2;
+string CentralProcessingUnit::getInstName() {
+    return instName;
+}
+
+string CentralProcessingUnit::decodeInstName() {
+    switch(I.group) {
+        case 0x0: //Data transfer group
+            switch(I.addressing) {
+                case 0x0:
+                    switch(I.opcode) {
+                        case 0x4:
+                            return "MV";
+                        case 0x8:
+                            return "PUSH";
+                        case 0x9:
+                            return "POP";
+                        case 0xD:
+                            return "SPRD";
+                        case 0xE:
+                            return "SPWR";
+                        default:
+                            phaseNext = 0xFF;
+                            return "ERR!";
+                    }
+                    break;
+                case 0x1:
+                    switch(I.opcode) {
+                        case 0x0:
+                            return "LDWI";
+                        case 0x1:
+                            return "LDBI";
+                        default:
+                            phaseNext = 0xFF;
+                            return "ERR!";
+                    }
+                    break;
+                case 0x2:
+                    switch(I.opcode) {
+                        case 0x0:
+                            return "LDWA";
+                        case 0x1:
+                            return "LDBA";
+                        case 0x2:
+                            return "STWA";
+                        case 0x3:
+                            return "STBA";
+                        default:
+                            phaseNext = 0xFF;
+                            return "ERR!";
+                    }
+                    break;
+                case 0x3:
+                    switch(I.opcode) {
+                        case 0x0:
+                            return "LDWR";
+                        case 0x1:
+                            return "LDBR";
+                        case 0x2:
+                            return "STWR";
+                        case 0x3:
+                            return "STBR";
+                        default:
+                            phaseNext = 0xFF;
+                            return "ERR!";
+                    }
+            }
+            break;
+        case 0x1: //Arithmetic-logic group
+            if(I.addressing != 0x0) {
+                phaseNext = 0xFF;
+                return "ERR!";
+            }
+            switch(I.opcode) {
+                case 0x0:
+                    return "ADD";
+                case 0x1:
+                    return "SUB";
+                case 0x2:
+                    return "NOT";
+                case 0x3:
+                    return "AND";
+                case 0x4:
+                    return "OR";
+                case 0x5:
+                    return "XOR";
+                case 0x8:
+                    return "INC";
+                case 0x9:
+                    return "DEC";
+                case 0xA:
+                    return "LSH";
+                case 0xB:
+                    return "RSH";
+                default:
+                    phaseNext = 0xFF;
+                    return "ERR!";
+            }
+            break;
+        case 0x2: //Input/output group
+            if(I.addressing != 0x0) {
+                phaseNext = 0xFF;
+                return "ERR!";
+            }
+            switch(I.opcode) {
+                case 0x0:
+                    return "INW";
+                case 0x1:
+                    return "INB";
+                case 0x2:
+                    return "OUTW";
+                case 0x3:
+                    return "OUTB";
+                case 0x4:
+                    return "TSTI";
+                case 0x5:
+                    return "TSTO";
+                default:
+                    phaseNext = 0xFF;
+                    return "ERR!";
+            }
+            break;
+        case 0x3: //Control group
+            if(I.addressing != 0x0) {
+                phaseNext = 0xFF;
+                return "ERR!";
+            }
+            switch (I.opcode) {
+                case 0x0:
+                    return "BR";
+                case 0x1:
+                    return "JMP";
+                case 0x2:
+                    return "JMPZ";
+                case 0x3:
+                    return "JMPNZ";
+                case 0x4:
+                    return "JMPN";
+                case 0x5:
+                    return "JMPNN";
+                case 0x6:
+                    return "JMPC";
+                case 0x7:
+                    return "JMPV";
+                case 0x8:
+                    return "CALL";
+                case 0x9:
+                    return "RET";
+                case 0xF:
+                    return "HALT";
+                default:
+                    phaseNext = 0xFF;
+                    return "ERR!";
+            }
+    }
+    return "ERR!";
 }
 
 void CentralProcessingUnit::ldwi() {
-    Uint16 data;
-    AR = PC;
-    SB->writeAddress(AR);
-    SB->writeControl(ControlBus(READ, MEMORY, WORD));
-    CM->operate();
-    SB->writeAddress(SB->readData());
-    SB->writeControl(ControlBus(READ, MEMORY, WORD));
-    CM->operate();
-    data = SB->readData();
-    ALU.load(I.r1, data);
+    Uint16 data = SB->readData();
+    ALU.load(I.ra, data);
+    PC += 2;
+    SR.Z = (data == 0);
+    SR.N = Int16(data) < 0;
+}
+
+void CentralProcessingUnit::ldwa() {
+    Uint16 data = SB->readData();
+    ALU.load(I.ra, data);
     PC += 2;
     SR.Z = (data == 0);
     SR.N = Int16(data) < 0;
 }
 
 void CentralProcessingUnit::ldwr() {
-    Uint16 data;
-    AR = ALU.get(I.r2);
-    SB->writeAddress(AR);
-    SB->writeControl(ControlBus(READ, MEMORY, WORD));
-    CM->operate();
-    data = SB->readData();
-    ALU.load(I.r1, data);
+    Uint16 data = SB->readData();
+    ALU.load(I.ra, data);
     SR.Z = (data == 0);
     SR.N = Int16(data) < 0;
 }
 
-void CentralProcessingUnit::ldba() {
-    Uint8 data;
-    AR = PC;
-    SB->writeAddress(AR);
-    SB->writeControl(ControlBus(READ, MEMORY, WORD));
-    CM->operate();
-    data = SB->readData();
-    ALU.load(I.r1, data);
+void CentralProcessingUnit::ldbi() {
+    Uint8 data = SB->readData();
+    ALU.load(I.ra, data);
     SR.Z = (data == 0);
     PC++;
 }
 
-void CentralProcessingUnit::ldbi() {
-    Uint8 data;
-    AR = PC;
-    SB->writeAddress(AR);
-    SB->writeControl(ControlBus(READ, MEMORY, WORD));
-    CM->operate();
-    SB->writeAddress(SB->readData());
-    SB->writeControl(ControlBus(READ, MEMORY, WORD));
-    CM->operate();
-    data = SB->readData();
-    ALU.load(I.r1, data);
+void CentralProcessingUnit::ldba() {
+    Uint8 data = SB->readData();
+    ALU.load(I.ra, data);
     SR.Z = (data == 0);
     PC += 2;
 }
 
 void CentralProcessingUnit::ldbr() {
-    Uint8 data;
-    AR = ALU.get(I.r2);
-    SB->writeAddress(AR);
-    SB->writeControl(ControlBus(READ, MEMORY, WORD));
-    CM->operate();
-    data = SB->readData();
-    ALU.load(I.r1, data);
+    Uint8 data = SB->readData();
+    ALU.load(I.ra, data);
     SR.Z = (data == 0);
 }
 

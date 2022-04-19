@@ -9,7 +9,7 @@
 	{
 		"fps_counter" : true,
 		"gui_scale" : 1,
-		"height" : 512,
+		"height" : 640,
 		"max_framerate" : 60,
 		"renderer_flags" : 
 		{

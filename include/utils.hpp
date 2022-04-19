@@ -68,7 +68,7 @@ struct Instruction {
     Uint8 group;
     Uint8 addressing;
     Uint8 opcode;
-    Uint8 r1, r2;
+    Uint8 ra, rb;
     Uint8 offset;
     /**
      * @brief Constructor
@@ -374,6 +374,9 @@ class CentralProcessingUnit{
          * @brief Function to decodes the instruction
         */
         void decodeInstruction();
+        /**
+         * @brief Function to fetch the operand
+        */
         void fetchOperand();
         void executeInstruction();
         /**
@@ -406,6 +409,11 @@ class CentralProcessingUnit{
          * @returns The stack pointer value
         */
         Uint16 getSP();
+        /**
+         * @brief Function to get the instruction name
+         * @return The instriction name, type string
+        */
+        string getInstName();
     private:
         Uint16 PC; //Program Counter
         Uint16 SP; //Stack Pointer
@@ -418,6 +426,13 @@ class CentralProcessingUnit{
         SystemBus* SB; //System Bus pointer
         CentralMemory* CM; //Central Memory pointer
         InputOutputDevices* IOD; //Input Output Devices pointer
+        Uint8 phaseNow, phaseNext; //Phases 0:IF 1:ID 2:OF 3:IE
+        string instName; //Instruction name, for GUI
+        /**
+         * @brief Function to decode the instruction name
+         * @returns The instruction name
+        */
+        string decodeInstName();
         /**
          * @brief Function that loads a word, that is after the instruction, in a register
         */
