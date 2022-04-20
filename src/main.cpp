@@ -65,12 +65,13 @@ int main(int argc, char* args[]) {
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow Window("GAME v1.0", settings.win.width, settings.win.height, flags, &logger, &settings);
+    RenderWindow Window("RISC-CPU SIMULATOR v0.1.0", settings.win.width, settings.win.height, flags, &logger, &settings);
     SDL_ShowCursor(0);
 
     //Loading the textures
     SDL_Texture* cursorTexture = Window.loadTexture("res/img/cursor.png");
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
+    SDL_Texture* cpuGuiTexture = Window.loadTexture("res/img/cpu_gui.png");
     SDL_Texture* progressBarTexture = Window.loadTexture("res/img/progress_bar.png");
     SDL_Texture* progressBarNowTexture = Window.loadTexture("res/img/progress_bar_now.png");
     SDL_Texture* progressBarNextTexture = Window.loadTexture("res/img/progress_bar_next.png");
@@ -86,10 +87,12 @@ int main(int argc, char* args[]) {
     SDL_Texture* pausePressedTexture = Window.loadTexture("res/img/pause_button_pressed.png");
     SDL_Texture* stopPressedTexture = Window.loadTexture("res/img/stop_button_pressed.png");
     Entity cursorEntity(Vector2f(0, 0), cursorTexture);
-    TextEntity fpsCounterEntity(Vector2f(1, 1), fontTexture, &font);
+    TextEntity fpsCounterEntity(Vector2f(3, 3), fontTexture, &font);
+    //GUI backgrounds
+    Entity cpuGui(Vector2f(6, 10), cpuGuiTexture, 256, 128);
     //Instruction name
-    TextEntity instNameTitle(Vector2f(32, 1), fontTexture, &font);
-    TextEntity instNameValue(Vector2f(84, 1), fontTexture, &font);
+    TextEntity instNameTitle(Vector2f(32, 3), fontTexture, &font);
+    TextEntity instNameValue(Vector2f(84, 3), fontTexture, &font);
     //Progress bar
     TextEntity progressBarIfTitle(Vector2f(178, 1), fontTexture, &font);
     TextEntity progressBarIdTitle(Vector2f(186, 1), fontTexture, &font);
@@ -107,25 +110,30 @@ int main(int argc, char* args[]) {
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
     //CPU
-    TextEntity cpuTitle(Vector2f(16, 16), fontTexture, &font);
-    TextEntity pcTitle(Vector2f(24, 24), fontTexture, &font);
-    TextEntity irTitle(Vector2f(24, 32), fontTexture, &font);
-    TextEntity srTitle(Vector2f(24, 40), fontTexture, &font);
-    TextEntity arTitle(Vector2f(24, 48), fontTexture, &font);
-    TextEntity drTitle(Vector2f(24, 56), fontTexture, &font);
-    TextEntity spTitle(Vector2f(24, 64), fontTexture, &font);
-    TextEntity pcValue(Vector2f(32, 24), fontTexture, &font);
-    TextEntity irValue(Vector2f(32, 32), fontTexture, &font);
-    TextEntity srValue(Vector2f(32, 40), fontTexture, &font);
-    TextEntity arValue(Vector2f(32, 48), fontTexture, &font);
-    TextEntity drValue(Vector2f(32, 56), fontTexture, &font);
-    TextEntity spValue(Vector2f(32, 64), fontTexture, &font);
+    TextEntity cpuTitle(Vector2f(7, 12), fontTexture, &font);
+    TextEntity cuTitle(Vector2f(7, 19), fontTexture, &font);
+    TextEntity aluTitle(Vector2f(36, 19), fontTexture, &font);
+    TextEntity pcTitle(Vector2f(7, 26), fontTexture, &font);
+    TextEntity irTitle(Vector2f(7, 34), fontTexture, &font);
+    TextEntity srTitle(Vector2f(7, 42), fontTexture, &font);
+    TextEntity arTitle(Vector2f(7, 50), fontTexture, &font);
+    TextEntity drTitle(Vector2f(7, 58), fontTexture, &font);
+    TextEntity spTitle(Vector2f(7, 66), fontTexture, &font);
+    TextEntity pcValue(Vector2f(15, 26), fontTexture, &font);
+    TextEntity irValue(Vector2f(15, 34), fontTexture, &font);
+    TextEntity srValue(Vector2f(15, 42), fontTexture, &font);
+    TextEntity arValue(Vector2f(15, 50), fontTexture, &font);
+    TextEntity drValue(Vector2f(15, 58), fontTexture, &font);
+    TextEntity spValue(Vector2f(15, 66), fontTexture, &font);
     vector<TextEntity> registriesTitles;
+    vector<TextEntity> registriesValues;
     for(Uint8 i = 0; i <= 0xF; i++) {
-        registriesTitles.push_back(TextEntity(Vector2f(64, 24 + 8 * i), fontTexture, &font));
+        registriesTitles.push_back(TextEntity(Vector2f(36, 26 + 6 * i), fontTexture, &font));
+        registriesValues.push_back(TextEntity(Vector2f(44, 26 + 6 * i), fontTexture, &font));
         string s = "!";
         s[0] = ((i < 0xA) ? (i + 48) : (i + 55));
         registriesTitles[i] = "R" + s;
+        registriesValues[i] = "0x0000";
     }
     instNameTitle = "Instruction name:";
     instNameValue = "-----";
@@ -134,6 +142,8 @@ int main(int argc, char* args[]) {
     progressBarOfTitle = "OF";
     progressBarIeTitle = "IE";
     cpuTitle = "CPU";
+    cuTitle = "CU";
+    aluTitle = "ALU";
     pcTitle = "PC";
     irTitle = "IR";
     srTitle = "SR";
@@ -240,8 +250,12 @@ int main(int argc, char* args[]) {
             arValue = "0x" + math::Uint16Tohexstr(CPU.getAR());
             drValue = "0x" + math::Uint16Tohexstr(CPU.getDR());
             spValue = "0x" + math::Uint16Tohexstr(CPU.getSP());
+            //GUI backgrounds
+            Window.renderGui(cpuGui);
             //CPU Render
             Window.renderText(cpuTitle);
+            Window.renderText(cuTitle);
+            Window.renderText(aluTitle);
             Window.renderText(pcTitle);
             Window.renderText(irTitle);
             Window.renderText(srTitle);
@@ -255,6 +269,9 @@ int main(int argc, char* args[]) {
             Window.renderText(drValue);
             Window.renderText(spValue);
             for(TextEntity e : registriesTitles) {
+                Window.renderText(e);
+            }
+            for(TextEntity e : registriesValues) {
                 Window.renderText(e);
             }
             //Instruction name

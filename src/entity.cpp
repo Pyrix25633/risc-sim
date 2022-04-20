@@ -11,7 +11,7 @@ Entity::Entity(Vector2f ppos, SDL_Texture* ptexture) :pos(ppos), texture(ptextur
     currentFrame.h = 16;
 }
 
-Entity::Entity(Vector2f ppos, SDL_Texture* ptexture, Uint8 h, Uint8 w) :pos(ppos), texture(ptexture) {
+Entity::Entity(Vector2f ppos, SDL_Texture* ptexture, Uint16 h, Uint16 w) :pos(ppos), texture(ptexture) {
     currentFrame.x = 0;
     currentFrame.y = 0;
     currentFrame.w = w;

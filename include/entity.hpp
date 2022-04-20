@@ -24,7 +24,7 @@ class Entity {
          * @param h Height
          * @param w Width
         */
-        Entity(Vector2f ppos, SDL_Texture* ptexture, Uint8 h, Uint8 w);
+        Entity(Vector2f ppos, SDL_Texture* ptexture, Uint16 h, Uint16 w);
         /**
          * @brief Function to get the position of the entity
          * @return The position, type Vector2f
