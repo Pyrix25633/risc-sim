@@ -5,7 +5,7 @@ WININCLUDES = -I include -I libs/SDL2/include -I C:/C++
 WINCFLAGS = -L libs/SDL2/lib -lSDL2main -lSDL2 -lSDL2_image -L libs/jsoncpp/build-shared -ljsoncpp
 DEBUGFLAGS = -c src/*.cpp -std=c++14 -m64 -g -I include
 RELEASEFLAGS = -c src/*.cpp -std=c++14 -m64 -O3 -I include
-VERSION = 0.0.1
+VERSION = 0.1.0
 NAME = risc-sim
 
 default:
