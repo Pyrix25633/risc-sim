@@ -20,10 +20,6 @@
 using namespace std;
 using namespace Json;
 
-typedef int8_t Int8;
-typedef int16_t Int16;
-typedef int32_t Int32;
-
 struct ControlBus;
 struct Instruction;
 struct StatusRegister;
@@ -378,6 +374,9 @@ class CentralProcessingUnit{
          * @brief Function to fetch the operand
         */
         void fetchOperand();
+        /**
+         * @brief Function to execute the instruction 
+        */
         void executeInstruction();
         /**
          * @brief Function to get the Program Counter value
@@ -414,6 +413,18 @@ class CentralProcessingUnit{
          * @return The instriction name, type string
         */
         string getInstName();
+        /**
+         * @brief Function to get a register from the ALU that is private
+         * @param r The registrer number
+         * @returns The value, type Uint16
+        */
+        Uint16 getR(Uint8 r);
+        /**
+         * @brief Function to get the two phases
+         * @param now Variable in which store phase now
+         * @param next Variable in which store phase next
+        */
+        void getPhases(Uint8 &now, Uint8 &next);
     private:
         Uint16 PC; //Program Counter
         Uint16 SP; //Stack Pointer

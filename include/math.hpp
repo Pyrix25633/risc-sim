@@ -7,6 +7,12 @@ struct StatusRegister;
 
 using namespace std;
 
+typedef int8_t Int8;
+typedef int16_t Int16;
+typedef int32_t Int32;
+ostream& operator << (ostream& os, Uint8 n);
+ostream& operator << (ostream& os, Int8 n);
+
 struct Vector2f;
 struct Vector2d;
 struct HitBox2d;

@@ -279,7 +279,7 @@ void SystemBus::resetBus() {
 }
 
 ArithmeticLogicUnit::ArithmeticLogicUnit(StatusRegister* pSR) :SR(pSR) {
-    for(Uint8 i = 0; i < 0xF; i++) {
+    for(Uint8 i = 0; i <= 0xF; i++) {
         R[i] = 0x0000;
     }
 }
@@ -396,7 +396,7 @@ Uint16 ArithmeticLogicUnit::get(Uint8 r) {
 }
 
 CentralProcessingUnit::CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD, Uint16 start)
-    :ALU(ArithmeticLogicUnit(&SR)), SB(pSB), CM(pCM), IOD(pIOD), PC(start) {}
+    :ALU(ArithmeticLogicUnit(&SR)), SB(pSB), CM(pCM), IOD(pIOD), PC(start), phaseNow(0xFF), phaseNext(0x0), instName("-----") {}
 
 void CentralProcessingUnit::fetchInstruction() {
     AR = PC;
@@ -640,6 +640,16 @@ string CentralProcessingUnit::getInstName() {
     return instName;
 }
 
+Uint16 CentralProcessingUnit::getR(Uint8 r) {
+    return ALU.get(r);
+}
+
+void CentralProcessingUnit::getPhases(Uint8 &now, Uint8 &next) {
+    now = phaseNow;
+    next = phaseNext;
+    return;
+}
+
 string CentralProcessingUnit::decodeInstName() {
     switch(I.group) {
         case 0x0: //Data transfer group
@@ -849,16 +859,16 @@ void CentralMemory::loadProgram(string path, bool bin, Logger* logger) {
         return;        
     }
     if(bin) {
-        char s[9];
+        char s[100];
         for(Uint16 i = 0; i < size && !file.eof(); i++) {
-            file.getline(s, 9);
+            file.getline(s, 100);
             M[i] = math::binstrToUint8(s);
         }
     }
     else {
-        char s[3];
+        char s[100];
         for(Uint16 i = 0; i < size && !file.eof(); i++) {
-            file.getline(s, 3);
+            file.getline(s, 100);
             M[i] = math::hexstrToUint8(s);
         }
     }

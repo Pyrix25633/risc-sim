@@ -2,6 +2,16 @@
 
 using namespace std;
 
+ostream& operator << (ostream& os, Uint8 n) {
+    os << Uint16(n);
+    return os;
+}
+
+ostream& operator << (ostream& os, Int8 n) {
+    os << Int16(n);
+    return os;
+}
+
 Vector2f::Vector2f() :x(0.0), y(0.0) {}
 
 Vector2f::Vector2f(float px, float py) :x(px), y(py) {}

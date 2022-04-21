@@ -11,10 +11,6 @@
 
 using namespace std;
 
-void randFunc(int a) {
-    cout << "Here is a button action! " << a << endl;
-}
-
 int main(int argc, char* args[]) {
     //Variables
     Logger logger;
@@ -31,8 +27,8 @@ int main(int argc, char* args[]) {
     Uint8 cursorState = 0; //0 -> normal, 1 -> hover, 2 -> normal clicked, 3 -> hover clicked
     Cursor cursor = JsonManager::getCursor();
     vector<HitBox2d> hitboxes = {HitBox2d(0, 0, 10, 10), HitBox2d(0, 100, 16, 16)}; //Vector of all hitboxes
-    Uint8 inHitboxes = 0;
-    bool clicked = false;
+    Uint8 inHitboxes = 0, phaseNow, phaseNext;
+    bool clicked = false, refresh = true, constantRefresh = false;
 
     //Interpreter
     SystemBus SB;
@@ -40,8 +36,6 @@ int main(int argc, char* args[]) {
     InputOutputDevices IOD(&SB);
     CentralProcessingUnit CPU(&SB, &CM, &IOD, settings.interpreter.start);
     CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
-    CPU.fetchInstruction();
-    CPU.decodeInstruction();
 
     //Capturing cout in log file
     if(settings.console.log) freopen("log.txt", "w", stdout);
@@ -205,27 +199,52 @@ int main(int argc, char* args[]) {
                 if(cursorState >= 2) fastButton.changePressed();
                 else fastButton.changeNormal();
                 inHitboxes++;
+                if(clicked) constantRefresh = true;
             }
             if(guiCursorPosition == *playButton.getHitBox()) {
                 if(cursorState >= 2) playButton.changePressed();
                 else playButton.changeNormal();
                 inHitboxes++;
-                if(clicked) playButton.action(randFunc);
+                if(clicked) refresh = true;
             }
             if(guiCursorPosition == *nextButton.getHitBox()) {
                 if(cursorState >= 2) nextButton.changePressed();
                 else nextButton.changeNormal();
                 inHitboxes++;
+                if(clicked) {
+                    refresh = true;
+                    switch(phaseNext) {
+                        case 0:
+                            CPU.fetchInstruction();
+                            break;
+                        case 1:
+                            CPU.decodeInstruction();
+                            break;
+                        case 2:
+                            CPU.fetchOperand();
+                            break;
+                        case 3:
+                            CPU.executeInstruction();
+                    }
+                }
             }
             if(guiCursorPosition == *pauseButton.getHitBox()) {
                 if(cursorState >= 2) pauseButton.changePressed();
                 else pauseButton.changeNormal();
                 inHitboxes++;
+                if(clicked) {
+                    constantRefresh = false;
+                    refresh = true;
+                }
             }
             if(guiCursorPosition == *stopButton.getHitBox()) {
                 if(cursorState >= 2) stopButton.changePressed();
                 else stopButton.changeNormal();
                 inHitboxes++;
+                if(clicked) {
+                    constantRefresh = false;
+                    refresh = true;
+                }
             }
             if(inHitboxes > 0) {
                 if(cursorState == 0) cursorState = 1;
@@ -243,13 +262,22 @@ int main(int argc, char* args[]) {
             }
             
             instNameValue = CPU.getInstName();
-            //CPU Values
-            pcValue = "0x" + math::Uint16Tohexstr(CPU.getPC());
-            irValue = "0x" + math::Uint16Tohexstr(CPU.getIR());
-            srValue = math::StatusRegisterToHexstr(CPU.getSR());
-            arValue = "0x" + math::Uint16Tohexstr(CPU.getAR());
-            drValue = "0x" + math::Uint16Tohexstr(CPU.getDR());
-            spValue = "0x" + math::Uint16Tohexstr(CPU.getSP());
+            if(refresh || constantRefresh) {
+                //CPU Values
+                pcValue = "0x" + math::Uint16Tohexstr(CPU.getPC());
+                irValue = "0x" + math::Uint16Tohexstr(CPU.getIR());
+                srValue = math::StatusRegisterToHexstr(CPU.getSR());
+                arValue = "0x" + math::Uint16Tohexstr(CPU.getAR());
+                drValue = "0x" + math::Uint16Tohexstr(CPU.getDR());
+                spValue = "0x" + math::Uint16Tohexstr(CPU.getSP());
+                refresh = false;
+                for(Uint8 i = 0; i < 16; i++) {
+                    registriesValues[i] = "0x" + math::Uint16Tohexstr(CPU.getR(i));
+                }
+                CPU.getPhases(phaseNow, phaseNext);
+                progressBarNowEntity.setX(178 + 8 * phaseNow);
+                progressBarNextEntity.setX(178 + 8 * phaseNext);
+            }
             //GUI backgrounds
             Window.renderGui(cpuGui);
             //CPU Render
@@ -283,8 +311,12 @@ int main(int argc, char* args[]) {
             Window.renderText(progressBarOfTitle);
             Window.renderText(progressBarIeTitle);
             Window.renderGui(progressBarEntity);
-            Window.renderGui(progressBarNowEntity);
-            Window.renderGui(progressBarNextEntity);
+            if(phaseNow < 4) {
+                Window.renderGui(progressBarNowEntity);
+            }
+            if(phaseNext < 4) {
+                Window.renderGui(progressBarNextEntity);
+            }
             //Buttons
             Window.renderButton(fastButton);
             Window.renderButton(playButton);
