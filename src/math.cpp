@@ -80,7 +80,7 @@ Uint8 math::hexstrToUint8(string s) {
 
 string math::Uint8Tohexstr(Uint8 n) {
     Uint8 m;
-    char s[2];
+    char s[3];
     for(Int8 i = 1; i >= 0; i--) {
         m = n % 16;
         if(m < 10) {
@@ -91,12 +91,13 @@ string math::Uint8Tohexstr(Uint8 n) {
         }
         n /= 16;
     }
+    s[2] = '\0';
     return s;
 }
 
 string math::Uint16Tohexstr(Uint16 n) {
     Uint8 m;
-    char s[4];
+    char s[5];
     for(Int8 i = 3; i >= 0; i--) {
         m = n % 16;
         if(m < 10) {
@@ -107,15 +108,17 @@ string math::Uint16Tohexstr(Uint16 n) {
         }
         n /= 16;
     }
+    s[4] = '\0';
     return s;
 }
 
 string math::StatusRegisterToHexstr(StatusRegister sr) {
-    char s[4];
+    char s[5];
     s[0] = ((sr.Z) ? '1' : '0');
     s[1] = ((sr.N) ? '1' : '0');
     s[2] = ((sr.C) ? '1' : '0');
     s[3] = ((sr.V) ? '1' : '0');
+    s[4] = '\0';
     return s;
 }
 
