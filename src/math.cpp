@@ -118,3 +118,33 @@ string math::StatusRegisterToHexstr(StatusRegister sr) {
     s[3] = ((sr.V) ? '1' : '0');
     return s;
 }
+
+Uint16 math::twosComplement(Uint16 n) {
+    bool bin[16], one[16], two[16];
+    Uint16 m;
+    bool carry = true, b;
+    for(Int8 i = 15; i >= 0; i--) {
+        m = n % 2;
+        bin[i] = m == 1;
+        n /= 2;
+    }
+    for(Uint8 i = 0; i < 16; i++) {
+        if(bin[i]) one[i] = 0;
+        else one[i] = true;
+    }
+    for(Int8 i = 15; i >= 0; i--) {
+        if(one[i] == 1 && carry) two[i] = 0;
+        else if(!one[i] && carry) {
+            two[i] = true;
+            carry = false;
+        }
+        else two[i] = one[i];
+    }
+    Uint16 N = 0;
+    Int8 i;
+    for(i = 15, m = 1; i >= 0; i--, m *= 2) {
+        b = two[i];
+        N += b * m;
+    }
+    return N;
+}

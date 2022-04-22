@@ -8,6 +8,7 @@
 #include "renderwindow.hpp"
 #include "entity.hpp"
 #include "utils.hpp"
+#include "risc.hpp"
 
 using namespace std;
 
@@ -109,16 +110,17 @@ int main(int argc, char* args[]) {
     TextEntity aluTitle(Vector2f(36, 19), fontTexture, &font);
     TextEntity pcTitle(Vector2f(7, 26), fontTexture, &font);
     TextEntity irTitle(Vector2f(7, 34), fontTexture, &font);
-    TextEntity srTitle(Vector2f(7, 42), fontTexture, &font);
-    TextEntity arTitle(Vector2f(7, 50), fontTexture, &font);
-    TextEntity drTitle(Vector2f(7, 58), fontTexture, &font);
-    TextEntity spTitle(Vector2f(7, 66), fontTexture, &font);
+    TextEntity srTitle(Vector2f(7, 47), fontTexture, &font);
+    TextEntity srElements(Vector2f(15, 42), fontTexture, &font);
+    TextEntity arTitle(Vector2f(7, 55), fontTexture, &font);
+    TextEntity drTitle(Vector2f(7, 63), fontTexture, &font);
+    TextEntity spTitle(Vector2f(7, 71), fontTexture, &font);
     TextEntity pcValue(Vector2f(15, 26), fontTexture, &font);
     TextEntity irValue(Vector2f(15, 34), fontTexture, &font);
-    TextEntity srValue(Vector2f(15, 42), fontTexture, &font);
-    TextEntity arValue(Vector2f(15, 50), fontTexture, &font);
-    TextEntity drValue(Vector2f(15, 58), fontTexture, &font);
-    TextEntity spValue(Vector2f(15, 66), fontTexture, &font);
+    TextEntity srValue(Vector2f(15, 47), fontTexture, &font);
+    TextEntity arValue(Vector2f(15, 55), fontTexture, &font);
+    TextEntity drValue(Vector2f(15, 63), fontTexture, &font);
+    TextEntity spValue(Vector2f(15, 71), fontTexture, &font);
     vector<TextEntity> registriesTitles;
     vector<TextEntity> registriesValues;
     for(Uint8 i = 0; i <= 0xF; i++) {
@@ -126,7 +128,7 @@ int main(int argc, char* args[]) {
         registriesValues.push_back(TextEntity(Vector2f(44, 26 + 6 * i), fontTexture, &font));
         string s = "!";
         s[0] = ((i < 0xA) ? (i + 48) : (i + 55));
-        registriesTitles[i] = "R" + s;
+        registriesTitles[i] = "R" + s + ":";
         registriesValues[i] = "0x0000";
     }
     instNameTitle = "Instruction name:";
@@ -138,12 +140,13 @@ int main(int argc, char* args[]) {
     cpuTitle = "CPU";
     cuTitle = "CU";
     aluTitle = "ALU";
-    pcTitle = "PC";
-    irTitle = "IR";
-    srTitle = "SR";
-    arTitle = "AR";
-    drTitle = "DR";
-    spTitle = "SP";
+    pcTitle = "PC:";
+    irTitle = "IR:";
+    srTitle = "SR:";
+    srElements = "ZNCV";
+    arTitle = "AR:";
+    drTitle = "DR:";
+    spTitle = "SP:";
     pcValue = "0x0000";
     irValue = "0x0000";
     srValue = "0000";
@@ -287,6 +290,7 @@ int main(int argc, char* args[]) {
             Window.renderText(pcTitle);
             Window.renderText(irTitle);
             Window.renderText(srTitle);
+            Window.renderText(srElements);
             Window.renderText(arTitle);
             Window.renderText(drTitle);
             Window.renderText(spTitle);

@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "utils.hpp"
+#include "risc.hpp"
 struct StatusRegister;
 
 using namespace std;
@@ -133,4 +134,10 @@ namespace math {
      * @return The hex string
     */
     string StatusRegisterToHexstr(StatusRegister sr);
+    /**
+     * @brief Function to calculate the twos complement of a 16bit number
+     * @param n The number
+     * @returns The twos complement
+    */
+    Uint16 twosComplement(Uint16 n);
 }
