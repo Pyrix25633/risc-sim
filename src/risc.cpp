@@ -188,7 +188,7 @@ Uint16 ArithmeticLogicUnit::get(Uint8 r) {
 
 CentralProcessingUnit::CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD, Uint16 start)
     :ALU(ArithmeticLogicUnit(&SR)), SB(pSB), CM(pCM), IOD(pIOD), PC(start), phaseNow(0xFF), phaseNext(0x0), instName("-----"),
-    SP(0x0), IR(0x0), AR(0x0), DR(0x0) {}
+    SP(0xFFFF), IR(0x0), AR(0x0), DR(0x0) {}
 
 void CentralProcessingUnit::fetchInstruction() {
     AR = PC;
@@ -213,12 +213,18 @@ void CentralProcessingUnit::decodeInstruction() {
         I.rb = (IR & 0x000F);
     }
     phaseNow = 1;
-    phaseNext = ((I.addressing > 0) ? 2 : 3);
+    phaseNext = ((I.addressing > 0 || I.group == 2 || (I.group == 3 && (I.opcode == 0 || I.opcode == 8))) ? 2 : 3);
     instName = decodeInstName();
 }
 
 void CentralProcessingUnit::fetchOperand() {
     switch(I.addressing) {
+        case 0x0: //16bit after the instruction
+            AR = PC;
+            SB->writeAddress(AR);
+            SB->writeControl(ControlBus(READ, MEMORY, WORD));
+            CM->operate();
+            break;
         case 0x1: //LD$I
             AR = PC;
             SB->writeAddress(AR);
@@ -259,8 +265,10 @@ void CentralProcessingUnit::executeInstruction() {
                         case 0x9:
                             break;
                         case 0xD:
+                            sprd();
                             break;
                         case 0xE:
+                            spwr();
                             break;
                         default:
                             phaseNext = 0xFF;
@@ -377,6 +385,7 @@ void CentralProcessingUnit::executeInstruction() {
             }
             switch (I.opcode) {
                 case 0x0:
+                    br();
                     break;
                 case 0x1:
                     break;
@@ -638,6 +647,18 @@ void CentralProcessingUnit::ldbr() {
     SR.Z = (data == 0);
 }
 
+void CentralProcessingUnit::sprd() {
+    ALU.load(I.ra, SP);
+}
+
+void CentralProcessingUnit::spwr() {
+    SP = ALU.get(I.ra);
+}
+
+void CentralProcessingUnit::br() {
+    PC = SB->readData();
+}
+
 CentralMemory::CentralMemory(SystemBus* pSB, Uint16 psize) :SB(pSB), size(psize) {
     for(Uint16 i = 0; i < size; i++) {
         M.push_back(0x00);
@@ -697,6 +718,11 @@ void CentralMemory::operate() {
             M[AB + 1] = b;
         }
     }
+}
+
+Uint8 CentralMemory::get(Uint16 address) {
+    if(address >= size) return 0x0;
+    return M[address];
 }
 
 InputOutputDevices::InputOutputDevices(SystemBus* pSB) :SB(pSB) {}

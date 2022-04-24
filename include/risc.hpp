@@ -334,6 +334,18 @@ class CentralProcessingUnit{
          * @brief Function that loads a byte, from an address that is in a register, in a register
         */
         void ldbr();
+        /**
+         * @brief function that read the stack pointer and put its value on a register
+        */
+        void sprd();
+        /**
+         * @brief Function that write the stack pointer with the value of a register
+        */
+        void spwr();
+        /**
+         * @brief Function to modify the program counter with an address after the instruction
+        */
+        void br();
 };
 
 class CentralMemory {
@@ -352,6 +364,12 @@ class CentralMemory {
          * @brief Function that reads the system bus and operate
         */
         void operate();
+        /**
+         * @brief Function to get the value of a cell
+         * @param address The cell address, type Uint16
+         * @returns The cell value, type Uint8
+        */
+        Uint8 get(Uint16 address);
     private:
         vector<Uint8> M; //All memory bytes
         Uint16 size; //Memory size

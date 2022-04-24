@@ -27,8 +27,8 @@ int main(int argc, char* args[]) {
     Vector2d cursorPosition, guiCursorPosition;
     Uint8 cursorState = 0; //0 -> normal, 1 -> hover, 2 -> normal clicked, 3 -> hover clicked
     Cursor cursor = JsonManager::getCursor();
-    vector<HitBox2d> hitboxes = {HitBox2d(0, 0, 10, 10), HitBox2d(0, 100, 16, 16)}; //Vector of all hitboxes
     Uint8 inHitboxes = 0, phaseNow, phaseNext;
+    Uint16 cellsStartAddress = 0x0; //For CM rendering
     bool clicked = false, refresh = true, constantRefresh = false;
 
     //Interpreter
@@ -60,13 +60,15 @@ int main(int argc, char* args[]) {
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow Window("RISC-CPU SIMULATOR v0.1.0", settings.win.width, settings.win.height, flags, &logger, &settings);
+    RenderWindow Window("RISC-CPU SIMULATOR v0.1.0", settings.win.width, settings.win.height
+        , flags, &logger, &settings, "res/img/icon.png");
     SDL_ShowCursor(0);
 
     //Loading the textures
     SDL_Texture* cursorTexture = Window.loadTexture("res/img/cursor.png");
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
     SDL_Texture* cpuGuiTexture = Window.loadTexture("res/img/cpu_gui.png");
+    SDL_Texture* cmGuiTexture = Window.loadTexture("res/img/cm_gui.png");
     SDL_Texture* progressBarTexture = Window.loadTexture("res/img/progress_bar.png");
     SDL_Texture* progressBarNowTexture = Window.loadTexture("res/img/progress_bar_now.png");
     SDL_Texture* progressBarNextTexture = Window.loadTexture("res/img/progress_bar_next.png");
@@ -85,6 +87,7 @@ int main(int argc, char* args[]) {
     TextEntity fpsCounterEntity(Vector2f(3, 3), fontTexture, &font);
     //GUI backgrounds
     Entity cpuGui(Vector2f(6, 10), cpuGuiTexture, 256, 128);
+    Entity cmGui(Vector2f(70, 10), cmGuiTexture, 256, 128);
     //Instruction name
     TextEntity instNameTitle(Vector2f(32, 3), fontTexture, &font);
     TextEntity instNameValue(Vector2f(84, 3), fontTexture, &font);
@@ -153,6 +156,19 @@ int main(int argc, char* args[]) {
     arValue = "0x0000";
     drValue = "0x0000";
     spValue = "0x0000";
+    //CM
+    TextEntity cmTitle(Vector2f(71, 12), fontTexture, &font);
+    TextEntity ramTitle(Vector2f(71, 19), fontTexture, &font);
+    vector<TextEntity> cellsTitles;
+    vector<TextEntity> cellsValues;
+    for(Uint16 i = 0; i <= 0xF; i++) {
+        cellsTitles.push_back(TextEntity(Vector2f(71, 26 + 6 * i), fontTexture, &font));
+        cellsValues.push_back(TextEntity(Vector2f(91, 26 + 6 * i), fontTexture, &font));
+        cellsTitles[i] = "0x" + math::Uint16Tohexstr(i) + ":";
+        cellsValues[i] = "0x00";
+    }
+    cmTitle = "CM";
+    ramTitle = "RAM";
 
     //Running
     previousSecond = SDL_GetTicks() / 1000;
@@ -181,16 +197,22 @@ int main(int argc, char* args[]) {
             clicked = false;
             //Controls
             while(SDL_PollEvent(&event)) {
-                if(event.type == SDL_QUIT) {
-                    running = false;
-                    cout << logger.getStringTime() << logger.info << "Game Windwow Closed" << logger.reset << endl;
-                }
-                else if(event.type == SDL_MOUSEBUTTONDOWN) {
-                    if(cursorState == 0 || cursorState == 1) cursorState += 2;
-                    clicked = true;
-                }
-                else if(event.type == SDL_MOUSEBUTTONUP) {
-                    if(cursorState == 2 || cursorState == 3) cursorState -= 2;
+                switch(event.type) {
+                    case SDL_QUIT:
+                        running = false;
+                        cout << logger.getStringTime() << logger.info << "Game Windwow Closed" << logger.reset << endl;
+                        break;
+                    case SDL_MOUSEBUTTONDOWN:
+                        if(cursorState == 0 || cursorState == 1) cursorState += 2;
+                        clicked = true;
+                        break;
+                    case SDL_MOUSEBUTTONUP:
+                        if(cursorState == 2 || cursorState == 3) cursorState -= 2;
+                        break;
+                    case SDL_MOUSEWHEEL:
+                            refresh = true;
+                            cellsStartAddress += 4 * event.wheel.y * -1;
+                        break;
                 }
             }
             //Actual processing
@@ -277,12 +299,17 @@ int main(int argc, char* args[]) {
                 for(Uint8 i = 0; i < 16; i++) {
                     registriesValues[i] = "0x" + math::Uint16Tohexstr(CPU.getR(i));
                 }
+                for(Uint16 i = 0, j = cellsStartAddress; i < 16; j++, i++) {
+                    cellsTitles[i] = "0x" + math::Uint16Tohexstr(j) + ":";
+                    cellsValues[i] = "0x" + math::Uint8Tohexstr(CM.get(j));
+                }
                 CPU.getPhases(phaseNow, phaseNext);
                 progressBarNowEntity.setX(178 + 8 * phaseNow);
                 progressBarNextEntity.setX(178 + 8 * phaseNext);
             }
             //GUI backgrounds
             Window.renderGui(cpuGui);
+            Window.renderGui(cmGui);
             //CPU Render
             Window.renderText(cpuTitle);
             Window.renderText(cuTitle);
@@ -304,6 +331,15 @@ int main(int argc, char* args[]) {
                 Window.renderText(e);
             }
             for(TextEntity e : registriesValues) {
+                Window.renderText(e);
+            }
+            //CM Render
+            Window.renderText(cmTitle);
+            Window.renderText(ramTitle);
+            for(TextEntity e : cellsTitles) {
+                Window.renderText(e);
+            }
+            for(TextEntity e : cellsValues) {
                 Window.renderText(e);
             }
             //Instruction name

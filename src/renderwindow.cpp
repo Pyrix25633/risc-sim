@@ -6,7 +6,7 @@
 
 using namespace std;
 
-RenderWindow::RenderWindow(const char* title, int width, int height, Uint32 flags, Logger* plogger, Settings* psettings)
+RenderWindow::RenderWindow(const char* title, int width, int height, Uint32 flags, Logger* plogger, Settings* psettings, const char* icon)
     :Window(NULL), Renderer(NULL), logger(plogger), settings(psettings) {
     //Initializing the Window
     Window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height,
@@ -19,6 +19,8 @@ RenderWindow::RenderWindow(const char* title, int width, int height, Uint32 flag
     else {
         cout << logger->success << "Window Init SUCCEEDED" << logger->reset << endl;
     }
+    SDL_Surface* iconSurface = IMG_Load(icon);
+    SDL_SetWindowIcon(Window, iconSurface);
     //Initializing the Renderer
     Renderer = SDL_CreateRenderer(Window, -1, flags);
     SDL_SetRenderDrawColor(Renderer, 50, 50, 50, 255);

@@ -22,8 +22,9 @@ class RenderWindow {
          * @param flags The renderer flags, type Uint32
          * @param plogger The logger, type Logger*
          * @param psettings The game settings, type GameSettings*
+         * @param icon The icon image path
         */
-        RenderWindow(const char* title, int width, int height, Uint32 flags, Logger* plogger, Settings* psettings);
+        RenderWindow(const char* title, int width, int height, Uint32 flags, Logger* plogger, Settings* psettings, const char* icon);
         /**
          * @brief Function to load a texture
          * @param filePath The file path, type char*

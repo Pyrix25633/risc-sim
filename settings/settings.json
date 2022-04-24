@@ -2,7 +2,7 @@
 	"interpreter" : 
 	{
 		"file" : "binary.hex",
-		"ram_size" : 1000,
+		"ram_size" : 65535,
 		"start" : 0
 	},
 	"window" : 
