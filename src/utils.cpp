@@ -131,8 +131,8 @@ Settings JsonManager::getSettings() {
     }
     settings.interpreter.ramSize = interpreter["ram_size"].asInt();
     if(settings.interpreter.ramSize > 0xFFFF) {
-        settings.interpreter.ramSize = 0x0000;
-        interpreter["ram_size"] = 0x0000;
+        settings.interpreter.ramSize = 0xFFFF;
+        interpreter["ram_size"] = 0xFFFF;
         errors++;
     }
     settings.interpreter.start = interpreter["start"].asInt();
@@ -143,7 +143,7 @@ Settings JsonManager::getSettings() {
     }
     string binFile = settings.interpreter.file;
     Uint16 lenght = binFile.length();
-    if(binFile[binFile[lenght - 3] == '.' && lenght - 2] == 'b' && binFile[lenght - 1] == 'i' && binFile[lenght] == 'n')
+    if(binFile[lenght - 3] == '.' && binFile[lenght - 2] == 'b' && binFile[lenght - 1] == 'i' && binFile[lenght] == 'n')
         settings.interpreter.binary = true;
     else
         settings.interpreter.binary = false;

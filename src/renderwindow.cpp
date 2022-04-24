@@ -19,7 +19,15 @@ RenderWindow::RenderWindow(const char* title, int width, int height, Uint32 flag
     else {
         cout << logger->success << "Window Init SUCCEEDED" << logger->reset << endl;
     }
-    SDL_Surface* iconSurface = IMG_Load(icon);
+    SDL_Surface* iconSurface = NULL;
+    iconSurface = IMG_Load(icon);
+    cout << logger->getStringTime();
+    if(iconSurface == NULL) {
+        cout << logger->warning << "Icon Load FAILED! SDL_ERROR: " << SDL_GetError() << logger->reset << endl;
+    }
+    else {
+        cout << logger->success << "Icon " << icon << " Load SUCCEEDED" << logger->reset << endl;
+    }
     SDL_SetWindowIcon(Window, iconSurface);
     //Initializing the Renderer
     Renderer = SDL_CreateRenderer(Window, -1, flags);
@@ -33,10 +41,10 @@ SDL_Texture* RenderWindow::loadTexture(const char* filePath) {
     texture = IMG_LoadTexture(Renderer, filePath);
     cout << logger->getStringTime();
     if(texture == NULL) {
-        cout << logger->error << "Texture Load FAILED! SDL_ERROR: " << SDL_GetError() << logger->reset << endl;
+        cout << logger->warning << "Texture Load FAILED! SDL_ERROR: " << SDL_GetError() << logger->reset << endl;
     }
     else {
-        cout << logger->success << "Texture " << filePath << " Init SUCCEEDED" << logger->reset << endl;
+        cout << logger->success << "Texture " << filePath << " Load SUCCEEDED" << logger->reset << endl;
     }
     return texture;
 }
