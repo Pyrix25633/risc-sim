@@ -69,6 +69,7 @@ int main(int argc, char* args[]) {
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
     SDL_Texture* cpuGuiTexture = Window.loadTexture("res/img/cpu_gui.png");
     SDL_Texture* cmGuiTexture = Window.loadTexture("res/img/cm_gui.png");
+    SDL_Texture* sbGuiTexture = Window.loadTexture("res/img/system_bus_gui.png");
     SDL_Texture* progressBarTexture = Window.loadTexture("res/img/progress_bar.png");
     SDL_Texture* progressBarNowTexture = Window.loadTexture("res/img/progress_bar_now.png");
     SDL_Texture* progressBarNextTexture = Window.loadTexture("res/img/progress_bar_next.png");
@@ -88,6 +89,7 @@ int main(int argc, char* args[]) {
     //GUI backgrounds
     Entity cpuGui(Vector2f(6, 10), cpuGuiTexture, 256, 128);
     Entity cmGui(Vector2f(70, 10), cmGuiTexture, 256, 128);
+    Entity sbGui(Vector2f(6, 121), sbGuiTexture, 128, 256);
     //Instruction name
     TextEntity instNameTitle(Vector2f(32, 3), fontTexture, &font);
     TextEntity instNameValue(Vector2f(84, 3), fontTexture, &font);
@@ -164,11 +166,24 @@ int main(int argc, char* args[]) {
     for(Uint16 i = 0; i <= 0xF; i++) {
         cellsTitles.push_back(TextEntity(Vector2f(71, 26 + 6 * i), fontTexture, &font));
         cellsValues.push_back(TextEntity(Vector2f(91, 26 + 6 * i), fontTexture, &font));
-        cellsTitles[i] = "0x" + math::Uint16Tohexstr(i) + ":";
+        cellsTitles[i] = "0x" + math::Uint16ToHexstr(i) + ":";
         cellsValues[i] = "0x00";
     }
     cmTitle = "CM";
     ramTitle = "RAM";
+    //SB
+    TextEntity abTitle(Vector2f(42, 134), fontTexture, &font);
+    TextEntity dbTitle(Vector2f(42, 145), fontTexture, &font);
+    TextEntity cbTitle(Vector2f(42, 156), fontTexture, &font);
+    TextEntity abValue(Vector2f(50, 134), fontTexture, &font);
+    TextEntity dbValue(Vector2f(50, 145), fontTexture, &font);
+    TextEntity cbValue(Vector2f(50, 156), fontTexture, &font);
+    abTitle = "AB:";
+    dbTitle = "DB:";
+    cbTitle = "CB:";
+    abValue = "0x0000";
+    dbValue = "0x0000";
+    cbValue = "0x0000";
 
     //Running
     previousSecond = SDL_GetTicks() / 1000;
@@ -289,27 +304,31 @@ int main(int argc, char* args[]) {
             instNameValue = CPU.getInstName();
             if(refresh || constantRefresh) {
                 //CPU Values
-                pcValue = "0x" + math::Uint16Tohexstr(CPU.getPC());
-                irValue = "0x" + math::Uint16Tohexstr(CPU.getIR());
+                pcValue = "0x" + math::Uint16ToHexstr(CPU.getPC());
+                irValue = "0x" + math::Uint16ToHexstr(CPU.getIR());
                 srValue = math::StatusRegisterToHexstr(CPU.getSR());
-                arValue = "0x" + math::Uint16Tohexstr(CPU.getAR());
-                drValue = "0x" + math::Uint16Tohexstr(CPU.getDR());
-                spValue = "0x" + math::Uint16Tohexstr(CPU.getSP());
+                arValue = "0x" + math::Uint16ToHexstr(CPU.getAR());
+                drValue = "0x" + math::Uint16ToHexstr(CPU.getDR());
+                spValue = "0x" + math::Uint16ToHexstr(CPU.getSP());
                 refresh = false;
                 for(Uint8 i = 0; i < 16; i++) {
-                    registriesValues[i] = "0x" + math::Uint16Tohexstr(CPU.getR(i));
+                    registriesValues[i] = "0x" + math::Uint16ToHexstr(CPU.getR(i));
                 }
                 for(Uint16 i = 0, j = cellsStartAddress; i < 16; j++, i++) {
-                    cellsTitles[i] = "0x" + math::Uint16Tohexstr(j) + ":";
-                    cellsValues[i] = "0x" + math::Uint8Tohexstr(CM.get(j));
+                    cellsTitles[i] = "0x" + math::Uint16ToHexstr(j) + ":";
+                    cellsValues[i] = "0x" + math::Uint8ToHexstr(CM.get(j));
                 }
                 CPU.getPhases(phaseNow, phaseNext);
                 progressBarNowEntity.setX(178 + 8 * phaseNow);
                 progressBarNextEntity.setX(178 + 8 * phaseNext);
+                abValue = "0x" + math::Uint16ToHexstr(SB.getAddress());
+                dbValue = "0x" + math::Uint16ToHexstr(SB.getData());
+                cbValue = "0x" + math::ControlBusToHexstr(SB.getControl());
             }
             //GUI backgrounds
             Window.renderGui(cpuGui);
             Window.renderGui(cmGui);
+            Window.renderGui(sbGui);
             //CPU Render
             Window.renderText(cpuTitle);
             Window.renderText(cuTitle);
@@ -342,6 +361,13 @@ int main(int argc, char* args[]) {
             for(TextEntity e : cellsValues) {
                 Window.renderText(e);
             }
+            //SB Render
+            Window.renderText(abTitle);
+            Window.renderText(dbTitle);
+            Window.renderText(cbTitle);
+            Window.renderText(abValue);
+            Window.renderText(dbValue);
+            Window.renderText(cbValue);
             //Instruction name
             Window.renderText(instNameTitle);
             Window.renderText(instNameValue);

@@ -5,6 +5,8 @@
 #include "utils.hpp"
 #include "risc.hpp"
 struct StatusRegister;
+struct ControlBus;
+
 
 using namespace std;
 
@@ -121,19 +123,25 @@ namespace math {
      * @param n The number, type Uint8
      * @returns The hexadecimal string
     */
-    string Uint8Tohexstr(Uint8 n);
+    string Uint8ToHexstr(Uint8 n);
     /**
      * @brief Function to get the hexadecimal string from a number
      * @param n The number, type Uint16
      * @returns The hexadecimal string
     */
-    string Uint16Tohexstr(Uint16 n);
+    string Uint16ToHexstr(Uint16 n);
     /**
      * @brief Function to get the hex string from the Status Register
      * @param sr The Status Register
      * @return The hex string
     */
     string StatusRegisterToHexstr(StatusRegister sr);
+    /**
+     * @brief Function to get the hex string from the Control Bus
+     * @param sr The Control Bus
+     * @return The hex string
+    */
+    string ControlBusToHexstr(ControlBus cb);
     /**
      * @brief Function to calculate the twos complement of a 16bit number
      * @param n The number

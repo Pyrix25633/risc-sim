@@ -78,7 +78,7 @@ Uint8 math::hexstrToUint8(string s) {
     return n;
 }
 
-string math::Uint8Tohexstr(Uint8 n) {
+string math::Uint8ToHexstr(Uint8 n) {
     Uint8 m;
     char s[3];
     for(Int8 i = 1; i >= 0; i--) {
@@ -95,7 +95,7 @@ string math::Uint8Tohexstr(Uint8 n) {
     return s;
 }
 
-string math::Uint16Tohexstr(Uint16 n) {
+string math::Uint16ToHexstr(Uint16 n) {
     Uint8 m;
     char s[5];
     for(Int8 i = 3; i >= 0; i--) {
@@ -150,4 +150,13 @@ Uint16 math::twosComplement(Uint16 n) {
         N += b * m;
     }
     return N;
+}
+
+string math::ControlBusToHexstr(ControlBus cb) {
+    char s[4];
+    s[0] = (cb.M ? 'M' : 'D');
+    s[1] = (cb.R ? 'R' : 'W');
+    s[2] = (cb.W ? 'W' : 'B');
+    s[3] = '\0';
+    return s;
 }

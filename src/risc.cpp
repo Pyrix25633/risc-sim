@@ -32,24 +32,18 @@ void SystemBus::writeControl(ControlBus c) {
     CB = c;
 }
 
-Uint16 SystemBus::readAddress() {
-    Uint16 a = AB;
+void SystemBus::cleanAddress() {
     AB = 0x0;
-    return a;
 }
 
-Uint16 SystemBus::readData() {
-    Uint16 d = DB;
+void SystemBus::cleanData() {
     DB = 0x0;
-    return d;
 }
 
-ControlBus SystemBus::readControl() {
-    ControlBus c = CB;
+void SystemBus::cleanControl() {
     CB.R = WRITE;
     CB.M = INPUTOUTPUT;
     CB.W = BYTE;
-    return c;
 }
 
 Uint16 SystemBus::getAddress() {
@@ -195,13 +189,16 @@ void CentralProcessingUnit::fetchInstruction() {
     SB->writeAddress(AR);
     SB->writeControl(ControlBus(READ, MEMORY, WORD));
     CM->operate();
-    IR = SB->readData();
+    IR = SB->getData();
     PC += 2;
     instName = "-----";
     phaseNow = 0, phaseNext = 1;
 }
 
 void CentralProcessingUnit::decodeInstruction() {
+    SB->cleanAddress();
+    SB->cleanData();
+    SB->cleanControl();
     I.group = (IR & 0xC000) >> 14;
     I.addressing = (IR & 0x3000) >> 12;
     I.opcode = (IR & 0x0F00) >> 8;
@@ -236,7 +233,7 @@ void CentralProcessingUnit::fetchOperand() {
             SB->writeAddress(AR);
             SB->writeControl(ControlBus(READ, MEMORY, WORD));
             CM->operate();
-            SB->writeAddress(SB->readData());
+            SB->writeAddress(SB->getData());
             SB->writeControl(ControlBus(READ, MEMORY, WORD));
             CM->operate();
             break;
@@ -251,6 +248,9 @@ void CentralProcessingUnit::fetchOperand() {
 }
 
 void CentralProcessingUnit::executeInstruction() {
+    SB->cleanAddress();
+    SB->cleanData();
+    SB->cleanControl();
     phaseNow = 3;
     phaseNext = 0;
     switch(I.group) {
@@ -388,18 +388,25 @@ void CentralProcessingUnit::executeInstruction() {
                     br();
                     break;
                 case 0x1:
+                    jmp();
                     break;
                 case 0x2:
+                    jmpz();
                     break;
                 case 0x3:
+                    jmpnz();
                     break;
                 case 0x4:
+                    jmpn();
                     break;
                 case 0x5:
+                    jmpnn();
                     break;
                 case 0x6:
+                    jmpc();
                     break;
                 case 0x7:
+                    jmpv();
                     break;
                 case 0x8:
                     break;
@@ -605,7 +612,7 @@ string CentralProcessingUnit::decodeInstName() {
 }
 
 void CentralProcessingUnit::ldwi() {
-    Uint16 data = SB->readData();
+    Uint16 data = SB->getData();
     ALU.load(I.ra, data);
     PC += 2;
     SR.Z = (data == 0);
@@ -613,7 +620,7 @@ void CentralProcessingUnit::ldwi() {
 }
 
 void CentralProcessingUnit::ldwa() {
-    Uint16 data = SB->readData();
+    Uint16 data = SB->getData();
     ALU.load(I.ra, data);
     PC += 2;
     SR.Z = (data == 0);
@@ -621,28 +628,28 @@ void CentralProcessingUnit::ldwa() {
 }
 
 void CentralProcessingUnit::ldwr() {
-    Uint16 data = SB->readData();
+    Uint16 data = SB->getData();
     ALU.load(I.ra, data);
     SR.Z = (data == 0);
     SR.N = Int16(data) < 0;
 }
 
 void CentralProcessingUnit::ldbi() {
-    Uint8 data = SB->readData();
+    Uint8 data = SB->getData();
     ALU.load(I.ra, data);
     SR.Z = (data == 0);
     PC++;
 }
 
 void CentralProcessingUnit::ldba() {
-    Uint8 data = SB->readData();
+    Uint8 data = SB->getData();
     ALU.load(I.ra, data);
     SR.Z = (data == 0);
     PC += 2;
 }
 
 void CentralProcessingUnit::ldbr() {
-    Uint8 data = SB->readData();
+    Uint8 data = SB->getData();
     ALU.load(I.ra, data);
     SR.Z = (data == 0);
 }
@@ -656,7 +663,38 @@ void CentralProcessingUnit::spwr() {
 }
 
 void CentralProcessingUnit::br() {
-    PC = SB->readData();
+    PC = SB->getData();
+}
+
+void CentralProcessingUnit::jmp() {
+    Uint16 offset;
+    if((I.offset >> 7) == 1) offset = 0xFF00 | I.offset;
+    else offset = I.offset;
+    PC += offset;
+}
+
+void CentralProcessingUnit::jmpz() {
+    if(SR.Z) jmp();
+}
+
+void CentralProcessingUnit::jmpnz() {
+    if(!SR.Z) jmp();
+}
+
+void CentralProcessingUnit::jmpn() {
+    if(SR.N) jmp();
+}
+
+void CentralProcessingUnit::jmpnn() {
+    if(!SR.N) jmp();
+}
+
+void CentralProcessingUnit::jmpc() {
+    if(SR.C) jmp();
+}
+
+void CentralProcessingUnit::jmpv() {
+    if(SR.V) jmp();
 }
 
 CentralMemory::CentralMemory(SystemBus* pSB, Uint16 psize) :SB(pSB), size(psize) {
@@ -689,7 +727,7 @@ void CentralMemory::loadProgram(string path, bool bin, Logger* logger) {
 
 void CentralMemory::operate() {
     Uint16 AB = SB->getAddress();
-    Uint16 DB = SB->readData();
+    Uint16 DB = SB->getData();
     ControlBus CB = SB->getControl();
     if(!CB.M) return;
     if(AB >= size) return;

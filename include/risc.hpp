@@ -102,20 +102,17 @@ class SystemBus {
         */
         void writeControl(ControlBus c);
         /**
-         * @brief Function to read from address bus and empty it
-         * @return What is written on address bus
+         * @brief Function to clean the address bus
         */
-        Uint16 readAddress();
+        void cleanAddress();
         /**
-         * @brief Function to read from data bus and empty it
-         * @return What is written on data bus
+         * @brief Function to clean the data bus
         */
-        Uint16 readData();
+        void cleanData();
         /**
-         * @brief Function to read from control bus and empty it
-         * @return What is written on control bus
+         * @brief Function to clean the control bus
         */
-        ControlBus readControl();
+        void cleanControl();
         /**
          * @brief Function to get the content of the address bus
          * @return What is written on address bus
@@ -346,6 +343,34 @@ class CentralProcessingUnit{
          * @brief Function to modify the program counter with an address after the instruction
         */
         void br();
+        /**
+         * @brief Function to modify the program counter with an offset 
+        */
+        void jmp();
+        /**
+         * @brief Function to jump if zero
+        */
+        void jmpz();
+        /**
+         * @brief Function to jump if not zero
+        */
+        void jmpnz();
+        /**
+         * @brief Function to jump if negative
+        */
+        void jmpn();
+        /**
+         * @brief Function to jump if not negative
+        */
+        void jmpnn();
+        /**
+         * @brief Function to jump if carry
+        */
+        void jmpc();
+        /**
+         * @brief Function to jump if overflow
+        */
+        void jmpv();
 };
 
 class CentralMemory {
