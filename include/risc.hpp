@@ -332,6 +332,22 @@ class CentralProcessingUnit{
         */
         void ldbr();
         /**
+         * @brief Function that stores a word, from an address that is after the instruction
+        */
+        void stwa();
+        /**
+         * @brief Function that stores a word, from an address that is in a register
+        */
+        void stwr();
+        /**
+         * @brief Function that stores a byte, from an address that is after the instruction
+        */
+        void stba();
+        /**
+         * @brief Function that stores a byte, from an address that is in a register
+        */
+        void stbr();
+        /**
          * @brief function that read the stack pointer and put its value on a register
         */
         void sprd();
@@ -380,7 +396,7 @@ class CentralMemory {
          * @param pSB System bus pointer
          * @param psize Memory fixed size
         */
-        CentralMemory(SystemBus* pSB, Uint16 psize);
+        CentralMemory(SystemBus* pSB, Uint32 psize);
         /**
          * @brief Program to load the program
         */
@@ -397,7 +413,7 @@ class CentralMemory {
         Uint8 get(Uint16 address);
     private:
         vector<Uint8> M; //All memory bytes
-        Uint16 size; //Memory size
+        Uint32 size; //Memory size
         SystemBus* SB; //System Bus pointer
 };
 

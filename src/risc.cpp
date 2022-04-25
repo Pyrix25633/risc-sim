@@ -210,11 +210,15 @@ void CentralProcessingUnit::decodeInstruction() {
         I.rb = (IR & 0x000F);
     }
     phaseNow = 1;
-    phaseNext = ((I.addressing > 0 || I.group == 2 || (I.group == 3 && (I.opcode == 0 || I.opcode == 8))) ? 2 : 3);
+    phaseNext = (((I.addressing > 0 && (I.addressing != 3 || (I.opcode != 2 && I.opcode != 3)))
+        || I.group == 2 || (I.group == 3 && (I.opcode == 0 || I.opcode == 8))) ? 2 : 3);
     instName = decodeInstName();
 }
 
 void CentralProcessingUnit::fetchOperand() {
+    SB->cleanAddress();
+    SB->cleanData();
+    SB->cleanControl();
     switch(I.addressing) {
         case 0x0: //16bit after the instruction
             AR = PC;
@@ -228,14 +232,22 @@ void CentralProcessingUnit::fetchOperand() {
             SB->writeControl(ControlBus(READ, MEMORY, WORD));
             CM->operate();
             break;
-        case 0x2: //LD$A
-            AR = PC;
-            SB->writeAddress(AR);
-            SB->writeControl(ControlBus(READ, MEMORY, WORD));
-            CM->operate();
-            SB->writeAddress(SB->getData());
-            SB->writeControl(ControlBus(READ, MEMORY, WORD));
-            CM->operate();
+        case 0x2: //$$$A
+            if(I.opcode == 0x0 || I.opcode == 0x1) { //LD$A
+                AR = PC;
+                SB->writeAddress(AR);
+                SB->writeControl(ControlBus(READ, MEMORY, WORD));
+                CM->operate();
+                SB->writeAddress(SB->getData());
+                SB->writeControl(ControlBus(READ, MEMORY, WORD));
+                CM->operate();
+            }
+            else { //ST$A
+                AR = PC;
+                SB->writeAddress(AR);
+                SB->writeControl(ControlBus(READ, MEMORY, WORD));
+                CM->operate();
+            }
             break;
         case 0x3: //LD$R
             AR = ALU.get(I.rb);
@@ -248,9 +260,6 @@ void CentralProcessingUnit::fetchOperand() {
 }
 
 void CentralProcessingUnit::executeInstruction() {
-    SB->cleanAddress();
-    SB->cleanData();
-    SB->cleanControl();
     phaseNow = 3;
     phaseNext = 0;
     switch(I.group) {
@@ -295,8 +304,10 @@ void CentralProcessingUnit::executeInstruction() {
                             ldba();
                             break;
                         case 0x2:
+                            stwa();
                             break;
                         case 0x3:
+                            stba();
                             break;
                         default:
                             phaseNext = 0xFF;
@@ -311,8 +322,10 @@ void CentralProcessingUnit::executeInstruction() {
                             ldbr();
                             break;
                         case 0x2:
+                            stwr();
                             break;
                         case 0x3:
+                            stbr();
                             break;
                         default:
                             phaseNext = 0xFF;
@@ -654,6 +667,36 @@ void CentralProcessingUnit::ldbr() {
     SR.Z = (data == 0);
 }
 
+void CentralProcessingUnit::stwa() {
+    SB->writeAddress(SB->getData());
+    SB->writeData(ALU.get(I.ra));
+    SB->writeControl(ControlBus(WRITE, MEMORY, WORD));
+    CM->operate();
+    PC += 2;
+}
+
+void CentralProcessingUnit::stwr() {
+    SB->writeAddress(I.rb);
+    SB->writeData(ALU.get(I.ra));
+    SB->writeControl(ControlBus(WRITE, MEMORY, WORD));
+    CM->operate();
+}
+
+void CentralProcessingUnit::stba() {
+    SB->writeAddress(SB->getData());
+    SB->writeData(ALU.get(I.ra));
+    SB->writeControl(ControlBus(WRITE, MEMORY, BYTE));
+    CM->operate();
+    PC += 2;
+}
+
+void CentralProcessingUnit::stbr() {
+    SB->writeAddress(I.rb);
+    SB->writeData(ALU.get(I.ra));
+    SB->writeControl(ControlBus(WRITE, MEMORY, BYTE));
+    CM->operate();
+}
+
 void CentralProcessingUnit::sprd() {
     ALU.load(I.ra, SP);
 }
@@ -697,8 +740,8 @@ void CentralProcessingUnit::jmpv() {
     if(SR.V) jmp();
 }
 
-CentralMemory::CentralMemory(SystemBus* pSB, Uint16 psize) :SB(pSB), size(psize) {
-    for(Uint16 i = 0; i < size; i++) {
+CentralMemory::CentralMemory(SystemBus* pSB, Uint32 psize) :SB(pSB), size(psize) {
+    for(Uint32 i = 0; i < size; i++) {
         M.push_back(0x00);
     }
 }
@@ -711,14 +754,14 @@ void CentralMemory::loadProgram(string path, bool bin, Logger* logger) {
     }
     if(bin) {
         char s[100];
-        for(Uint16 i = 0; i < size && !file.eof(); i++) {
+        for(Uint32 i = 0; i < size && !file.eof(); i++) {
             file.getline(s, 100);
             M[i] = math::binstrToUint8(s);
         }
     }
     else {
         char s[100];
-        for(Uint16 i = 0; i < size && !file.eof(); i++) {
+        for(Uint32 i = 0; i < size && !file.eof(); i++) {
             file.getline(s, 100);
             M[i] = math::hexstrToUint8(s);
         }
@@ -750,8 +793,8 @@ void CentralMemory::operate() {
         }
         else {
             Uint8 a, b;
-            a = DB | 0xFF;
-            b = (DB | 0xFF00) >> 8;
+            a = DB & 0xFF;
+            b = (DB & 0xFF00) >> 8;
             M[AB] = a;
             M[AB + 1] = b;
         }

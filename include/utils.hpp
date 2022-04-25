@@ -76,7 +76,7 @@ struct WindowSettings {
 */
 struct InterpreterSettings {
     string file;
-    Uint16 ramSize, start;
+    Uint32 ramSize, start;
     bool binary;
 };
 /**

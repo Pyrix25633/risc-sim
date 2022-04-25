@@ -92,7 +92,9 @@ int main(int argc, char* args[]) {
     Entity sbGui(Vector2f(6, 121), sbGuiTexture, 128, 256);
     //Instruction name
     TextEntity instNameTitle(Vector2f(32, 3), fontTexture, &font);
-    TextEntity instNameValue(Vector2f(84, 3), fontTexture, &font);
+    TextEntity instNameValue(Vector2f(82, 3), fontTexture, &font);
+    instNameTitle = "Instruction name:";
+    instNameValue = "-----";
     //Progress bar
     TextEntity progressBarIfTitle(Vector2f(178, 1), fontTexture, &font);
     TextEntity progressBarIdTitle(Vector2f(186, 1), fontTexture, &font);
@@ -136,8 +138,6 @@ int main(int argc, char* args[]) {
         registriesTitles[i] = "R" + s + ":";
         registriesValues[i] = "0x0000";
     }
-    instNameTitle = "Instruction name:";
-    instNameValue = "-----";
     progressBarIfTitle = "IF";
     progressBarIdTitle = "ID";
     progressBarOfTitle = "OF";
@@ -183,7 +183,7 @@ int main(int argc, char* args[]) {
     cbTitle = "CB:";
     abValue = "0x0000";
     dbValue = "0x0000";
-    cbValue = "0x0000";
+    cbValue = "DWB";
 
     //Running
     previousSecond = SDL_GetTicks() / 1000;
@@ -226,7 +226,18 @@ int main(int argc, char* args[]) {
                         break;
                     case SDL_MOUSEWHEEL:
                             refresh = true;
-                            cellsStartAddress += 4 * event.wheel.y * -1;
+                            if(event.wheel.y < 0) {
+                                if(cellsStartAddress < settings.interpreter.ramSize - 4)
+                                    cellsStartAddress += 4;
+                                else
+                                    cellsStartAddress = 4 - (settings.interpreter.ramSize - cellsStartAddress);
+                            }
+                            else {
+                                if(cellsStartAddress >= 4)
+                                    cellsStartAddress -= 4;
+                                else
+                                    cellsStartAddress = settings.interpreter.ramSize - (4 - cellsStartAddress);
+                            }
                         break;
                 }
             }
@@ -315,6 +326,7 @@ int main(int argc, char* args[]) {
                     registriesValues[i] = "0x" + math::Uint16ToHexstr(CPU.getR(i));
                 }
                 for(Uint16 i = 0, j = cellsStartAddress; i < 16; j++, i++) {
+                    if(j == settings.interpreter.ramSize) j = 0;
                     cellsTitles[i] = "0x" + math::Uint16ToHexstr(j) + ":";
                     cellsValues[i] = "0x" + math::Uint8ToHexstr(CM.get(j));
                 }
@@ -323,7 +335,7 @@ int main(int argc, char* args[]) {
                 progressBarNextEntity.setX(178 + 8 * phaseNext);
                 abValue = "0x" + math::Uint16ToHexstr(SB.getAddress());
                 dbValue = "0x" + math::Uint16ToHexstr(SB.getData());
-                cbValue = "0x" + math::ControlBusToHexstr(SB.getControl());
+                cbValue = math::ControlBusToHexstr(SB.getControl());
             }
             //GUI backgrounds
             Window.renderGui(cpuGui);

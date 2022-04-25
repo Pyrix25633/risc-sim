@@ -130,9 +130,9 @@ Settings JsonManager::getSettings() {
         errors++;
     }
     settings.interpreter.ramSize = interpreter["ram_size"].asInt();
-    if(settings.interpreter.ramSize > 0xFFFF) {
-        settings.interpreter.ramSize = 0xFFFF;
-        interpreter["ram_size"] = 0xFFFF;
+    if(settings.interpreter.ramSize > 0x10000) {
+        settings.interpreter.ramSize = 0x10000;
+        interpreter["ram_size"] = 0x10000;
         errors++;
     }
     settings.interpreter.start = interpreter["start"].asInt();
