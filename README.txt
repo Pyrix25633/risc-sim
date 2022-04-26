@@ -20,7 +20,7 @@
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Central Memory                                                                             │   ║
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
-║  │ + up to 2^16 8bit cells, 16bit data are stored in little endian                            │   ║
+║  │ + up to 2^16 8bit cells, 16bit data is  stored in little endian                            │   ║
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Input Output Devices                                                                       │   ║
@@ -41,7 +41,33 @@
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════╣
 ║  Instructions                                                                                     ║
-║  TODO                                                                                             ║
+║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
+║  │ Data Transfer                                                                              │   ║
+║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
+║  │ + LDWI: loads a word, that is after the instruction, in "d"                                │   ║
+║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:D, C:-, V:-   │   ║
+║  │ + LDWA: loads a word, whose address is after the instruction, in "d"                       │   ║
+║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:D, C:-, V:-   │   ║
+║  │ + LDWR: loads a word, whose address is in the register "a", in "d"                         │   ║
+║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:D, C:-, V:-   │   ║
+║  │ + LDBI: loads a byte, that is after the instruction, in "d"                                │   ║
+║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:-, C:-, V:-   │   ║
+║  │ + LDWA: loads a byte, whose address is after the instruction, in "d"                       │   ║
+║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:-, C:-, V:-   │   ║
+║  │ + LDWR: loads a byte, whose address is in the register "a", in "d"                         │   ║
+║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:-, C:-, V:-   │   ║
+║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
+║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
+║  │ Legend                                                                                     │   ║
+║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
+║  │ + s: source register                                                                       │   ║
+║  │ + d: destination register                                                                  │   ║
+║  │ + a: register containing the address                                                       │   ║
+║  │ + F: offset                                                                                │   ║
+║  │ + D: depends                                                                               │   ║
+║  │ + -: unaffected                                                                            │   ║
+║  │ + 0: setted to 0                                                                           │   ║
+║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════╣
 ║  Program Settings                                                                                 ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
