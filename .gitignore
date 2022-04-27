@@ -2,3 +2,4 @@ bin/
 *.o
 binaries/
 *.sh
+*.bat
