@@ -65,6 +65,10 @@ void SystemBus::resetBus() {
 }
 
 ArithmeticLogicUnit::ArithmeticLogicUnit(StatusRegister* pSR) :SR(pSR) {
+    reset();
+}
+
+void ArithmeticLogicUnit::reset() {
     for(Uint8 i = 0; i <= 0xF; i++) {
         R[i] = 0x0000;
     }
@@ -180,9 +184,20 @@ Uint16 ArithmeticLogicUnit::get(Uint8 r) {
     return R[r];
 }
 
-CentralProcessingUnit::CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD, Uint16 start)
-    :ALU(ArithmeticLogicUnit(&SR)), SB(pSB), CM(pCM), IOD(pIOD), PC(start), phaseNow(0xFF), phaseNext(0x0), instName("-----"),
-    SP(0xFFFF), IR(0x0), AR(0x0), DR(0x0) {}
+CentralProcessingUnit::CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD, InterpreterSettings settings)
+    :ALU(ArithmeticLogicUnit(&SR)), SB(pSB), CM(pCM), IOD(pIOD), PC(settings.start), phaseNow(0xFF), phaseNext(0x0), instName("-----"),
+    SP(settings.ramSize - 2), IR(0x0), AR(0x0), DR(0x0) {}
+
+void CentralProcessingUnit::reset(InterpreterSettings settings) {
+    PC = settings.start;
+    phaseNow = 0xFF, phaseNext = 0x0;
+    instName = "-----";
+    SP = settings.ramSize - 2;
+    IR = 0x0;
+    AR = 0x0;
+    DR = 0x0;
+    ALU.reset();
+}
 
 void CentralProcessingUnit::fetchInstruction() {
     AR = PC;
@@ -268,10 +283,13 @@ void CentralProcessingUnit::executeInstruction() {
                 case 0x0:
                     switch(I.opcode) {
                         case 0x4:
+                            cp();
                             break;
                         case 0x8:
+                            push();
                             break;
                         case 0x9:
+                            pop();
                             break;
                         case 0xD:
                             sprd();
@@ -422,10 +440,13 @@ void CentralProcessingUnit::executeInstruction() {
                     jmpv();
                     break;
                 case 0x8:
+                    call();
                     break;
                 case 0x9:
+                    ret();
                     break;
                 case 0xF:
+                    hlt();
                     break;
                 default:
                     phaseNext = 0xFF;
@@ -615,7 +636,7 @@ string CentralProcessingUnit::decodeInstName() {
                 case 0x9:
                     return "RET";
                 case 0xF:
-                    return "HALT";
+                    return "HLT";
                 default:
                     phaseNext = 0xFF;
                     return "ERR!";
@@ -697,6 +718,26 @@ void CentralProcessingUnit::stbr() {
     CM->operate();
 }
 
+void CentralProcessingUnit::cp() {
+    ALU.load(I.ra, ALU.get(I.rb));
+}
+
+void CentralProcessingUnit::push() {
+    SB->writeAddress(SP);
+    SB->writeData(ALU.get(I.ra));
+    SB->writeControl(ControlBus(WRITE, MEMORY, WORD));
+    CM->operate();
+    SP -= 2;
+}
+
+void CentralProcessingUnit::pop() {
+    SP += 2;
+    SB->writeAddress(SP);
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    ALU.load(I.ra, SB->getData());
+}
+
 void CentralProcessingUnit::sprd() {
     ALU.load(I.ra, SP);
 }
@@ -740,7 +781,37 @@ void CentralProcessingUnit::jmpv() {
     if(SR.V) jmp();
 }
 
+void CentralProcessingUnit::call() {
+    Uint16 address = SB->getData();
+    SB->writeAddress(SP);
+    SB->writeData(PC);
+    SB->writeControl(ControlBus(WRITE, MEMORY, WORD));
+    CM->operate();
+    SP -= 2;
+    PC = address;
+}
+
+void CentralProcessingUnit::ret() {
+    SP += 2;
+    SB->writeAddress(SP);
+    SB->writeControl(ControlBus(READ, MEMORY, WORD));
+    CM->operate();
+    PC = SB->getData();
+}
+
+void CentralProcessingUnit::hlt() {
+    phaseNext = 0xF0;
+}
+
 CentralMemory::CentralMemory(SystemBus* pSB, Uint32 psize) :SB(pSB), size(psize) {
+    for(Uint32 i = 0; i < size; i++) {
+        M.push_back(0x00);
+    }
+}
+
+void CentralMemory::reset(Uint32 psize) {
+    size = psize;
+    M.clear();
     for(Uint32 i = 0; i < size; i++) {
         M.push_back(0x00);
     }

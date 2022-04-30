@@ -30,12 +30,13 @@ int main(int argc, char* args[]) {
     Uint8 inHitboxes = 0, phaseNow, phaseNext;
     Uint16 cellsStartAddress = 0x0; //For CM rendering
     bool clicked = false, refresh = true, constantRefresh = false;
+    bool fullInstruction = false, constantFullInstruction = false, progressBarAll = false;
 
     //Interpreter
     SystemBus SB;
     CentralMemory CM(&SB, settings.interpreter.ramSize);
     InputOutputDevices IOD(&SB);
-    CentralProcessingUnit CPU(&SB, &CM, &IOD, settings.interpreter.start);
+    CentralProcessingUnit CPU(&SB, &CM, &IOD, settings.interpreter);
     CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
 
     //Capturing cout in log file
@@ -78,12 +79,12 @@ int main(int argc, char* args[]) {
     SDL_Texture* playTexture = Window.loadTexture("res/img/play_button.png");
     SDL_Texture* nextTexture = Window.loadTexture("res/img/next_button.png");
     SDL_Texture* pauseTexture = Window.loadTexture("res/img/pause_button.png");
-    SDL_Texture* stopTexture = Window.loadTexture("res/img/stop_button.png");
+    SDL_Texture* reloadTexture = Window.loadTexture("res/img/reload_button.png");
     SDL_Texture* fastPressedTexture = Window.loadTexture("res/img/fast_button_pressed.png");
     SDL_Texture* playPressedTexture = Window.loadTexture("res/img/play_button_pressed.png");
     SDL_Texture* nextPressedTexture = Window.loadTexture("res/img/next_button_pressed.png");
     SDL_Texture* pausePressedTexture = Window.loadTexture("res/img/pause_button_pressed.png");
-    SDL_Texture* stopPressedTexture = Window.loadTexture("res/img/stop_button_pressed.png");
+    SDL_Texture* reloadPressedTexture = Window.loadTexture("res/img/reload_button_pressed.png");
     Entity cursorEntity(Vector2f(0, 0), cursorTexture);
     TextEntity fpsCounterEntity(Vector2f(3, 3), fontTexture, &font);
     //GUI backgrounds
@@ -103,12 +104,13 @@ int main(int argc, char* args[]) {
     Entity progressBarEntity(Vector2f(178, 4), progressBarTexture, 16, 64);
     Entity progressBarNowEntity(Vector2f(178, 4), progressBarNowTexture);
     Entity progressBarNextEntity(Vector2f(186, 4), progressBarNextTexture);
+    Entity progressBarAllEntity(Vector2f(178, 4), progressBarAllTexture, 16, 64);
     //Buttons
     Button fastButton(Vector2f(211, 1), HitBox2d(211, 1, 7, 7), fastTexture, fastPressedTexture);
     Button playButton(Vector2f(220, 1), HitBox2d(220, 1, 7, 7), playTexture, playPressedTexture);
     Button nextButton(Vector2f(229, 1), HitBox2d(229, 1, 7, 7), nextTexture, nextPressedTexture);
     Button pauseButton(Vector2f(238, 1), HitBox2d(238, 1, 7, 7), pauseTexture, pausePressedTexture);
-    Button stopButton(Vector2f(247, 1), HitBox2d(247, 1, 7, 7), stopTexture, stopPressedTexture);
+    Button reloadButton(Vector2f(247, 1), HitBox2d(247, 1, 7, 7), reloadTexture, reloadPressedTexture);
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
     //CPU
@@ -250,13 +252,19 @@ int main(int argc, char* args[]) {
                 if(cursorState >= 2) fastButton.changePressed();
                 else fastButton.changeNormal();
                 inHitboxes++;
-                if(clicked) constantRefresh = true;
+                if(clicked) {
+                    constantRefresh = true;
+                    constantFullInstruction = true;
+                }
             }
             if(guiCursorPosition == *playButton.getHitBox()) {
                 if(cursorState >= 2) playButton.changePressed();
                 else playButton.changeNormal();
                 inHitboxes++;
-                if(clicked) refresh = true;
+                if(clicked) {
+                    refresh = true;
+                    fullInstruction = true;
+                }
             }
             if(guiCursorPosition == *nextButton.getHitBox()) {
                 if(cursorState >= 2) nextButton.changePressed();
@@ -277,6 +285,7 @@ int main(int argc, char* args[]) {
                         case 3:
                             CPU.executeInstruction();
                     }
+                    progressBarAll = false;
                 }
             }
             if(guiCursorPosition == *pauseButton.getHitBox()) {
@@ -286,15 +295,22 @@ int main(int argc, char* args[]) {
                 if(clicked) {
                     constantRefresh = false;
                     refresh = true;
+                    constantFullInstruction = false;
                 }
             }
-            if(guiCursorPosition == *stopButton.getHitBox()) {
-                if(cursorState >= 2) stopButton.changePressed();
-                else stopButton.changeNormal();
+            if(guiCursorPosition == *reloadButton.getHitBox()) {
+                if(cursorState >= 2) reloadButton.changePressed();
+                else reloadButton.changeNormal();
                 inHitboxes++;
                 if(clicked) {
                     constantRefresh = false;
                     refresh = true;
+                    constantFullInstruction = false;
+                    settings = JsonManager::getSettings();
+                    CPU.reset(settings.interpreter);
+                    SB = SystemBus();
+                    CM.reset(settings.interpreter.ramSize);
+                    CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
                 }
             }
             if(inHitboxes > 0) {
@@ -313,6 +329,20 @@ int main(int argc, char* args[]) {
             }
             
             instNameValue = CPU.getInstName();
+            if(phaseNext >= 4) {
+                fullInstruction = false;
+                constantFullInstruction = false;
+            }
+            CPU.getPhases(phaseNow, phaseNext);
+            if((fullInstruction || constantFullInstruction) && phaseNext < 4) {
+                CPU.fetchInstruction();
+                CPU.decodeInstruction();
+                CPU.getPhases(phaseNow, phaseNext);
+                if(phaseNext == 2) CPU.fetchOperand();
+                CPU.executeInstruction();
+                fullInstruction = false;
+                progressBarAll = true;
+            }
             if(refresh || constantRefresh) {
                 //CPU Values
                 pcValue = "0x" + math::Uint16ToHexstr(CPU.getPC());
@@ -389,18 +419,21 @@ int main(int argc, char* args[]) {
             Window.renderText(progressBarOfTitle);
             Window.renderText(progressBarIeTitle);
             Window.renderGui(progressBarEntity);
-            if(phaseNow < 4) {
+            if(phaseNow < 4 && !progressBarAll) {
                 Window.renderGui(progressBarNowEntity);
             }
-            if(phaseNext < 4) {
+            if(phaseNext < 4 && !progressBarAll) {
                 Window.renderGui(progressBarNextEntity);
+            }
+            if(progressBarAll) {
+                Window.renderGui(progressBarAllEntity);
             }
             //Buttons
             Window.renderButton(fastButton);
             Window.renderButton(playButton);
             Window.renderButton(nextButton);
             Window.renderButton(pauseButton);
-            Window.renderButton(stopButton);
+            Window.renderButton(reloadButton);
             Window.renderCursor(cursorEntity);
             Window.display();
         }

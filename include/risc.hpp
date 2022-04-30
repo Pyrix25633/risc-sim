@@ -2,6 +2,7 @@
 
 #include "utils.hpp"
 struct Logger;
+struct InterpreterSettings;
 
 using namespace std;
 
@@ -145,6 +146,10 @@ class ArithmeticLogicUnit {
         */
         ArithmeticLogicUnit(StatusRegister* pSR);
         /**
+         * @brief Function to reset the ALU
+        */
+        void reset();
+        /**
          * @brief Function to add two numbers, d += s
          * @param d Destination register
          * @param s Source register
@@ -222,9 +227,14 @@ class CentralProcessingUnit{
          * @param pSB System bus pointer
          * @param pCM Central memory pointer
          * @param pIOD Input/output devices pointer
-         * @param start Address of first program code line
+         * @param settings The interpreter settings
         */
-        CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD, Uint16 start);
+        CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD, InterpreterSettings settings);
+        /**
+         * @brief Function to reset the CPU
+         * @param settings The interpreter settings
+        */
+        void reset(InterpreterSettings settings);
         /**
          * @brief Function that fetches the instruction from the memory
         */
@@ -348,6 +358,18 @@ class CentralProcessingUnit{
         */
         void stbr();
         /**
+         * @brief function that copies the value of a register in another register
+        */
+        void cp();
+        /**
+         * @brief function that saves a register in the stack
+        */
+        void push();
+        /**
+         * @brief function that restores a register from the stack
+        */
+        void pop();
+        /**
          * @brief function that read the stack pointer and put its value on a register
         */
         void sprd();
@@ -387,6 +409,18 @@ class CentralProcessingUnit{
          * @brief Function to jump if overflow
         */
         void jmpv();
+        /**
+         * @brief Function to call a subroutine
+        */
+        void call();
+        /**
+         * @brief Function to return from a subroutine
+        */
+        void ret();
+        /**
+         * @brief Function to exit the program
+        */
+        void hlt();
 };
 
 class CentralMemory {
@@ -397,6 +431,11 @@ class CentralMemory {
          * @param psize Memory fixed size
         */
         CentralMemory(SystemBus* pSB, Uint32 psize);
+        /**
+         * @brief Function to reset the CM
+         * @param psize Memory fixed size
+        */
+        void reset(Uint32 psize);
         /**
          * @brief Program to load the program
         */
