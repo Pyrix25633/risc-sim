@@ -100,20 +100,20 @@ int main(int argc, char* args[]) {
     instNameTitle = "Instruction name:";
     instNameValue = "-----";
     //Progress bar
-    TextEntity progressBarIfTitle(Vector2f(178, 1), fontTexture, &font);
-    TextEntity progressBarIdTitle(Vector2f(186, 1), fontTexture, &font);
-    TextEntity progressBarOfTitle(Vector2f(194, 1), fontTexture, &font);
-    TextEntity progressBarIeTitle(Vector2f(202, 1), fontTexture, &font);
-    Entity progressBarEntity(Vector2f(178, 4), progressBarTexture, 16, 64);
-    Entity progressBarNowEntity(Vector2f(178, 4), progressBarNowTexture);
-    Entity progressBarNextEntity(Vector2f(186, 4), progressBarNextTexture);
-    Entity progressBarAllEntity(Vector2f(178, 4), progressBarAllTexture, 16, 64);
+    TextEntity progressBarIfTitle(Vector2f(111, 1), fontTexture, &font);
+    TextEntity progressBarIdTitle(Vector2f(119, 1), fontTexture, &font);
+    TextEntity progressBarOfTitle(Vector2f(127, 1), fontTexture, &font);
+    TextEntity progressBarIeTitle(Vector2f(135, 1), fontTexture, &font);
+    Entity progressBarEntity(Vector2f(111, 4), progressBarTexture, 16, 64);
+    Entity progressBarNowEntity(Vector2f(111, 4), progressBarNowTexture);
+    Entity progressBarNextEntity(Vector2f(119, 4), progressBarNextTexture);
+    Entity progressBarAllEntity(Vector2f(111, 4), progressBarAllTexture, 16, 64);
     //Buttons
-    Button fastButton(Vector2f(211, 1), HitBox2d(211, 1, 7, 7), fastTexture, fastPressedTexture);
-    Button playButton(Vector2f(220, 1), HitBox2d(220, 1, 7, 7), playTexture, playPressedTexture);
-    Button nextButton(Vector2f(229, 1), HitBox2d(229, 1, 7, 7), nextTexture, nextPressedTexture);
-    Button pauseButton(Vector2f(238, 1), HitBox2d(238, 1, 7, 7), pauseTexture, pausePressedTexture);
-    Button reloadButton(Vector2f(247, 1), HitBox2d(247, 1, 7, 7), reloadTexture, reloadPressedTexture);
+    Button fastButton(Vector2f(111, 12), HitBox2d(111, 12, 7, 7), fastTexture, fastPressedTexture);
+    Button playButton(Vector2f(120, 12), HitBox2d(120, 12, 7, 7), playTexture, playPressedTexture);
+    Button nextButton(Vector2f(129, 12), HitBox2d(129, 12, 7, 7), nextTexture, nextPressedTexture);
+    Button pauseButton(Vector2f(138, 12), HitBox2d(138, 12, 7, 7), pauseTexture, pausePressedTexture);
+    Button reloadButton(Vector2f(147, 12), HitBox2d(147, 12, 7, 7), reloadTexture, reloadPressedTexture);
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
     //CPU
@@ -384,8 +384,8 @@ int main(int argc, char* args[]) {
                     cellsValues[i] = "0x" + math::Uint8ToHexstr(CM.get(j));
                 }
                 CPU.getPhases(phaseNow, phaseNext);
-                progressBarNowEntity.setX(178 + 8 * phaseNow);
-                progressBarNextEntity.setX(178 + 8 * phaseNext);
+                progressBarNowEntity.setX(111 + 8 * phaseNow);
+                progressBarNextEntity.setX(111 + 8 * phaseNext);
                 abValue = "0x" + math::Uint16ToHexstr(SB.getAddress());
                 dbValue = "0x" + math::Uint16ToHexstr(SB.getData());
                 cbValue = math::ControlBusToHexstr(SB.getControl());
