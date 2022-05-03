@@ -878,3 +878,51 @@ Uint8 CentralMemory::get(Uint16 address) {
 }
 
 InputOutputDevices::InputOutputDevices(SystemBus* pSB) :SB(pSB) {}
+
+void InputOutputDevices::operate() {
+    ControlBus control = SB->getControl();
+    Uint16 address = SB->getAddress();
+    Uint16 data = SB->getData();
+    if(control.M) return;
+    if(address == 0x0 && !control.R) { //Output monitor
+        Uint16 data = SB->getData();
+        if(data == '\n') {
+            line0 = line1;
+            line1 = line2;
+            line2 = line3;
+            line3 = "";
+        }
+        else if(line0.size() == 20) {
+            if(line1.size() == 20) {
+                if(line2.size() == 20) {
+                    if(line3.size() == 20) {
+                        line0 = line1;
+                        line1 = line2;
+                        line2 = line3;
+                        line3 = char(data);
+                    }
+                    else {
+                        line3 += char(data);
+                    }
+                }
+                else {
+                    line2 += char(data);
+                }
+            }
+            else {
+                line1 += char(data);
+            }
+        }
+        else {
+            line0 += char(data);
+        }
+    }
+    else if(address == 0x1 && control.R) { //Input keyboard
+        SB->writeData(key);
+        key = 0x0;
+    }
+}
+
+void InputOutputDevices::input(Uint8 i) {
+    key = i;
+}

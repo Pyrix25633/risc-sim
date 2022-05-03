@@ -463,6 +463,10 @@ class InputOutputDevices {
          * @param pSB System bus pointer
         */
         InputOutputDevices(SystemBus* pSB);
+        void input(Uint8 i);
+        void operate();
     private:
         SystemBus* SB; //System Bus pointer
+        Uint8 key;
+        string line0, line1, line2, line3;
 };

@@ -31,6 +31,7 @@ int main(int argc, char* args[]) {
     Uint16 cellsStartAddress = 0x0; //For CM rendering
     bool clicked = false, refresh = true, constantRefresh = false;
     bool fullInstruction = false, constantFullInstruction = false, progressBarAll = false;
+    Uint8 key; //For keyboard input
 
     //Interpreter
     SystemBus SB;
@@ -70,6 +71,7 @@ int main(int argc, char* args[]) {
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
     SDL_Texture* cpuGuiTexture = Window.loadTexture("res/img/cpu_gui.png");
     SDL_Texture* cmGuiTexture = Window.loadTexture("res/img/cm_gui.png");
+    SDL_Texture* iodGuiTexture = Window.loadTexture("res/img/iod_gui.png");
     SDL_Texture* sbGuiTexture = Window.loadTexture("res/img/system_bus_gui.png");
     SDL_Texture* progressBarTexture = Window.loadTexture("res/img/progress_bar.png");
     SDL_Texture* progressBarNowTexture = Window.loadTexture("res/img/progress_bar_now.png");
@@ -90,7 +92,8 @@ int main(int argc, char* args[]) {
     //GUI backgrounds
     Entity cpuGui(Vector2f(6, 10), cpuGuiTexture, 256, 128);
     Entity cmGui(Vector2f(70, 10), cmGuiTexture, 256, 128);
-    Entity sbGui(Vector2f(6, 121), sbGuiTexture, 128, 256);
+    Entity iodGui(Vector2f(111, 58), iodGuiTexture, 256, 128);
+    Entity sbGui(Vector2f(6, 121), sbGuiTexture, 128, 384);
     //Instruction name
     TextEntity instNameTitle(Vector2f(32, 3), fontTexture, &font);
     TextEntity instNameValue(Vector2f(82, 3), fontTexture, &font);
@@ -212,6 +215,7 @@ int main(int argc, char* args[]) {
             }
             msNext = msNow + msStep;
             clicked = false;
+            key = 0x0;
             //Controls
             while(SDL_PollEvent(&event)) {
                 switch(event.type) {
@@ -240,6 +244,25 @@ int main(int argc, char* args[]) {
                                 else
                                     cellsStartAddress = settings.interpreter.ramSize - (4 - cellsStartAddress);
                             }
+                        break;
+                    case SDL_KEYDOWN:
+                        SDL_Scancode code = event.key.keysym.scancode;
+                        if(code >= SDL_SCANCODE_A && code <= SDL_SCANCODE_Z) {
+                            key = code + 93;
+                        }
+                        else if(code >= SDL_SCANCODE_1 && code <= SDL_SCANCODE_9) {
+                            key = code + 19;
+                        }
+                        else if(code >= SDL_SCANCODE_KP_1 && code <= SDL_SCANCODE_KP_9) {
+                            key = code - 40;
+                        }
+                        else if(code == SDL_SCANCODE_0 || code == SDL_SCANCODE_KP_0) {
+                            key = '0';
+                        }
+                        else if(code == SDL_SCANCODE_KP_ENTER) {
+                            key = '\n';
+                        }
+                        IOD.input(key);
                         break;
                 }
             }
@@ -370,6 +393,7 @@ int main(int argc, char* args[]) {
             //GUI backgrounds
             Window.renderGui(cpuGui);
             Window.renderGui(cmGui);
+            Window.renderGui(iodGui);
             Window.renderGui(sbGui);
             //CPU Render
             Window.renderText(cpuTitle);
