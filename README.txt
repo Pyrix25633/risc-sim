@@ -20,7 +20,7 @@
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Central Memory                                                                             │   ║
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
-║  │ + up to 2^16 8bit cells, 16bit data is  stored in little endian                            │   ║
+║  │ + up to 2^16 8bit cells, 16bit data is stored in little endian                             │   ║
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Input Output Devices                                                                       │   ║
@@ -42,20 +42,88 @@
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════╣
 ║  Instructions                                                                                     ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
-║  │ Data Transfer                                                                              │   ║
+║  │ Data Transfer Group                                                                        │   ║
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
 ║  │ + LDWI: loads a word, that is after the instruction, in "d"                                │   ║
-║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:D, C:-, V:-   │   ║
+║  │  - binary: 00010000dddd0000    hexadecimal: 10d0    status register: Z:D, N:D, C:-, V:-    │   ║
 ║  │ + LDWA: loads a word, whose address is after the instruction, in "d"                       │   ║
-║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:D, C:-, V:-   │   ║
+║  │  - binary: 00100000dddd0000    hexadecimal: 20d0    status register: Z:D, N:D, C:-, V:-    │   ║
 ║  │ + LDWR: loads a word, whose address is in the register "a", in "d"                         │   ║
-║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:D, C:-, V:-   │   ║
+║  │  - binary: 00110000ddddaaaa    hexadecimal: 30da    status register: Z:D, N:D, C:-, V:-    │   ║
 ║  │ + LDBI: loads a byte, that is after the instruction, in "d"                                │   ║
-║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:-, C:-, V:-   │   ║
+║  │  - binary: 00010001dddd0000    hexadecimal: 11d0    status register: Z:D, N:-, C:-, V:-    │   ║
 ║  │ + LDWA: loads a byte, whose address is after the instruction, in "d"                       │   ║
-║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:-, C:-, V:-   │   ║
+║  │  - binary: 00100001dddd0000    hexadecimal: 21d0    status register: Z:D, N:-, C:-, V:-    │   ║
 ║  │ + LDWR: loads a byte, whose address is in the register "a", in "d"                         │   ║
-║  │  - binary: 00010000dddd0000    hexadecimal: 10d0     status register: Z:D, N:-, C:-, V:-   │   ║
+║  │  - binary: 00110001ddddaaaa    hexadecimal: 31da    status register: Z:D, N:-, C:-, V:-    │   ║
+║  │ + STWA: stores a word, from "s", to an address which is after the instruction              │   ║
+║  │  - binary: 00100010ssss0000    hexadecimal: 22d0    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + STWR: stores a word, from "s", to an address which is in "a"                             │   ║
+║  │  - binary: 00110010ssssaaaa    hexadecimal: 32da    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + STBA: stores a byte, from "s", to an address which is after the instruction              │   ║
+║  │  - binary: 00100011ssss0000    hexadecimal: 23d0    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + STBR: stores a byte, from "s", to an address which is in "a"                             │   ║
+║  │  - binary: 00110011ssssaaaa    hexadecimal: 33da    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + CP: copies the value of "s" in "d"                                                       │   ║
+║  │  - binary: 00000100ssssdddd    hexadecimal: 04sd    status register: Z:D, N:D, C:-, V:-    │   ║
+║  │ + PUSH: saves the value of "s" in the stack                                                │   ║
+║  │  - binary: 00001000ssss0000    hexadecimal: 08s0    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + POP: restores "d" from the stack                                                         │   ║
+║  │  - binary: 00001001dddd0000    hexadecimal: 09d0    status register: Z:D, N:D, C:-, V:-    │   ║
+║  │ + SPRD: writes the value of the stack pointer in "d"                                       │   ║
+║  │  - binary: 00001101dddd0000    hexadecimal: 0Ed0    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + SPWR: writes the value of "s" in the stack pointer                                       │   ║
+║  │  - binary: 00001110ssss0000    hexadecimal: 0Ds0    status register: Z:-, N:-, C:-, V:-    │   ║
+║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
+║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
+║  │ Arithmetic-Logic Group                                                                     │   ║
+║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
+║  │ + ADD: d = d + s                                                                           │   ║
+║  │  - binary: 01000000ssssdddd    hexadecimal: 40sd    status register: Z:D, N:D, C:D, V:D    │   ║
+║  │ + SUB: d = d - s                                                                           │   ║
+║  │  - binary: 01000001ssssdddd    hexadecimal: 41sd    status register: Z:D, N:D, C:D, V:D    │   ║
+║  │ + NOT: d = ~d                                                                              │   ║
+║  │  - binary: 01000010dddd0000    hexadecimal: 42d0    status register: Z:D, N:D, C:0, V:0    │   ║
+║  │ + AND: d = d & s                                                                           │   ║
+║  │  - binary: 01000011ssssdddd    hexadecimal: 43sd    status register: Z:D, N:D, C:0, V:0    │   ║
+║  │ + OR: d = d | s                                                                            │   ║
+║  │  - binary: 01000100ssssdddd    hexadecimal: 44sd    status register: Z:D, N:D, C:0, V:0    │   ║
+║  │ + XOR: d = d ^ s                                                                           │   ║
+║  │  - binary: 01000101ssssdddd    hexadecimal: 45sd    status register: Z:D, N:D, C:0, V:0    │   ║
+║  │ + INC: d = d + 1                                                                           │   ║
+║  │  - binary: 01001000dddd0000    hexadecimal: 48d0    status register: Z:D, N:D, C:D, V:D    │   ║
+║  │ + DEC: d = d - 1                                                                           │   ║
+║  │  - binary: 01001001dddd0000    hexadecimal: 49d0    status register: Z:D, N:D, C:D, V:D    │   ║
+║  │ + LSH: d = d << 1                                                                          │   ║
+║  │  - binary: 01001010dddd0000    hexadecimal: 4Ad0    status register: Z:D, N:D, C:D, V:0    │   ║
+║  │ + RSH: d = d >> 1                                                                          │   ║
+║  │  - binary: 01001011dddd0000    hexadecimal: 4Bd0    status register: Z:D, N:D, C:0, V:0    │   ║
+║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
+║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
+║  │ Control Group                                                                              │   ║
+║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
+║  │ + BR: writes an address, which is after the instruction, in the program counter            │   ║
+║  │  - binary: 1100000000000000    hexadecimal: C000    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + JMP: modifies the program counter with an offset "f"                                     │   ║
+║  │  - binary: 11000001ffffffff    hexadecimal: C1ff    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + JMPZ: JMP if Z == 1                                                                      │   ║
+║  │  - binary: 11000010ffffffff    hexadecimal: C2ff    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + JMPNZ: JMP if Z == 0                                                                     │   ║
+║  │  - binary: 11000011ffffffff    hexadecimal: C3ff    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + JMPN: JMP if N == 1                                                                      │   ║
+║  │  - binary: 11000100ffffffff    hexadecimal: C4ff    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + JMPNN: JMP if N == 0                                                                     │   ║
+║  │  - binary: 11000101ffffffff    hexadecimal: C5ff    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + JMPC: JMP if C == 1                                                                      │   ║
+║  │  - binary: 11000110ffffffff    hexadecimal: C6ff    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + JMPV: JMP if V == 1                                                                      │   ║
+║  │  - binary: 11000111ffffffff    hexadecimal: C7ff    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + CALL: starts a subroutine, from an address which is after the instruction                │   ║
+║  │  - binary: 1100100000000000    hexadecimal: C8ff    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + RET: returns from the subroutine, where it was called                                    │   ║
+║  │  - binary: 1100100100000000    hexadecimal: C900    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + HLT: exit the program                                                                    │   ║
+║  │  - binary: 1100111100000000    hexadecimal: CF00    status register: Z:-, N:-, C:-, V:-    │   ║
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Legend                                                                                     │   ║
@@ -63,7 +131,7 @@
 ║  │ + s: source register                                                                       │   ║
 ║  │ + d: destination register                                                                  │   ║
 ║  │ + a: register containing the address                                                       │   ║
-║  │ + F: offset                                                                                │   ║
+║  │ + f: offset                                                                                │   ║
 ║  │ + D: depends                                                                               │   ║
 ║  │ + -: unaffected                                                                            │   ║
 ║  │ + 0: setted to 0                                                                           │   ║

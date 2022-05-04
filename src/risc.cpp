@@ -77,13 +77,13 @@ void ArithmeticLogicUnit::reset() {
 void ArithmeticLogicUnit::add(Uint8 d, Uint8 s) {
     if(d > 0xF) return;
     if(s > 0xF) return;
-    Uint32 res1 = R[d] + R[s];
+    Uint32 resc = R[d] + R[s];
     Int16 a = Int16(R[d]), b = Int16(R[s]), c = a + b;
-    Int32 res2 = a + b;
+    Int32 res = a + b;
     R[d] += R[s];
-    SR->C = (R[d] != res1);
-    SR->V = (c != res2);
-    SR->N = (res2 < 0x0);
+    SR->C = (resc > 0xFFFF);
+    SR->V = (c != res);
+    SR->N = (res < 0x0);
     SR->Z = (R[d] == 0x0);
 }
 
@@ -879,6 +879,10 @@ Uint8 CentralMemory::get(Uint16 address) {
 
 InputOutputDevices::InputOutputDevices(SystemBus* pSB) :SB(pSB) {}
 
+void InputOutputDevices::input(Uint8 i) {
+    key = i;
+}
+
 void InputOutputDevices::operate() {
     ControlBus control = SB->getControl();
     Uint16 address = SB->getAddress();
@@ -923,6 +927,9 @@ void InputOutputDevices::operate() {
     }
 }
 
-void InputOutputDevices::input(Uint8 i) {
-    key = i;
+void InputOutputDevices::getLines(string &l0, string &l1, string &l2, string &l3) {
+    l0 = line0;
+    l1 = line1;
+    l2 = line2;
+    l3 = line3;
 }

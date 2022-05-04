@@ -92,7 +92,7 @@ int main(int argc, char* args[]) {
     //GUI backgrounds
     Entity cpuGui(Vector2f(6, 10), cpuGuiTexture, 256, 128);
     Entity cmGui(Vector2f(70, 10), cmGuiTexture, 256, 128);
-    Entity iodGui(Vector2f(111, 58), iodGuiTexture, 256, 128);
+    Entity iodGui(Vector2f(111, 51), iodGuiTexture, 256, 128);
     Entity sbGui(Vector2f(6, 121), sbGuiTexture, 128, 384);
     //Instruction name
     TextEntity instNameTitle(Vector2f(32, 3), fontTexture, &font);
@@ -176,6 +176,21 @@ int main(int argc, char* args[]) {
     }
     cmTitle = "CM";
     ramTitle = "RAM";
+    //IOD
+    TextEntity iodTitle(Vector2f(112, 53), fontTexture, &font);
+    TextEntity monitorTitle(Vector2f(112, 60), fontTexture, &font);
+    TextEntity monitorLine0(Vector2f(112, 67), fontTexture, &font);
+    TextEntity monitorLine1(Vector2f(112, 72), fontTexture, &font);
+    TextEntity monitorLine2(Vector2f(112, 77), fontTexture, &font);
+    TextEntity monitorLine3(Vector2f(112, 82), fontTexture, &font);
+    TextEntity keyboardTitle(Vector2f(112, 89), fontTexture, &font);
+    iodTitle = "IOD";
+    monitorTitle = "0x0000 Monitor";
+    monitorLine0 = "";
+    monitorLine1 = "";
+    monitorLine2 = "";
+    monitorLine3 = "";
+    keyboardTitle = "0x0001 Keyboard";
     //SB
     TextEntity abTitle(Vector2f(42, 134), fontTexture, &font);
     TextEntity dbTitle(Vector2f(42, 145), fontTexture, &font);
@@ -384,11 +399,17 @@ int main(int argc, char* args[]) {
                     cellsValues[i] = "0x" + math::Uint8ToHexstr(CM.get(j));
                 }
                 CPU.getPhases(phaseNow, phaseNext);
-                progressBarNowEntity.setX(111 + 8 * phaseNow);
-                progressBarNextEntity.setX(111 + 8 * phaseNext);
+                string l0, l1, l2, l3;
+                IOD.getLines(l0, l1, l2, l3);
+                monitorLine0 = l0;
+                monitorLine1 = l1;
+                monitorLine2 = l2;
+                monitorLine3 = l3;
                 abValue = "0x" + math::Uint16ToHexstr(SB.getAddress());
                 dbValue = "0x" + math::Uint16ToHexstr(SB.getData());
                 cbValue = math::ControlBusToHexstr(SB.getControl());
+                progressBarNowEntity.setX(111 + 8 * phaseNow);
+                progressBarNextEntity.setX(111 + 8 * phaseNext);
             }
             //GUI backgrounds
             Window.renderGui(cpuGui);
@@ -427,6 +448,14 @@ int main(int argc, char* args[]) {
             for(TextEntity e : cellsValues) {
                 Window.renderText(e);
             }
+            //IOD Render
+            Window.renderText(iodTitle);
+            Window.renderText(monitorTitle);
+            Window.renderText(monitorLine0);
+            Window.renderText(monitorLine1);
+            Window.renderText(monitorLine2);
+            Window.renderText(monitorLine3);
+            Window.renderText(keyboardTitle);
             //SB Render
             Window.renderText(abTitle);
             Window.renderText(dbTitle);

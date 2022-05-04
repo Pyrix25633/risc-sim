@@ -7,19 +7,19 @@
 	},
 	"window" : 
 	{
+	    "max_framerate" : 60,
 		"fps_counter" : true,
+		"scale" : 1,
 		"gui_scale" : 1,
+		"width" : 722,
 		"height" : 664,
-		"max_framerate" : 60,
 		"renderer_flags" : 
 		{
 			"gpu_acceleration" : true,
 			"software_fallback" : false,
 			"target_texture" : true,
 			"vsync" : false
-		},
-		"scale" : 1,
-		"width" : 722
+		}
 	},
 	"console" : 
 	{

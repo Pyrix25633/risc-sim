@@ -463,8 +463,23 @@ class InputOutputDevices {
          * @param pSB System bus pointer
         */
         InputOutputDevices(SystemBus* pSB);
+        /**
+         * @brief Function to input a byte
+         * @param i The byte
+        */
         void input(Uint8 i);
+        /**
+         * @brief Function to make the IODs operate
+        */
         void operate();
+        /**
+         * @brief Function to get the lines from the monitor
+         * @param l0 Reference to the string for the line 0
+         * @param l1 Reference to the string for the line 1
+         * @param l2 Reference to the string for the line 2
+         * @param l3 Reference to the string for the line 3
+        */
+        void getLines(string &l0, string &l1, string &l2, string &l3);
     private:
         SystemBus* SB; //System Bus pointer
         Uint8 key;
