@@ -42,6 +42,10 @@ SDL_Texture* Entity::getTexture() {
     return texture;
 }
 
+void Entity::setTexture(SDL_Texture* tex) {
+    texture = tex;
+}
+
 SDL_Rect Entity::getCurrentFrame() {
     return currentFrame;
 }

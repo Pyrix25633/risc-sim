@@ -72,6 +72,8 @@ int main(int argc, char* args[]) {
     SDL_Texture* cpuGuiTexture = Window.loadTexture("res/img/cpu_gui.png");
     SDL_Texture* cmGuiTexture = Window.loadTexture("res/img/cm_gui.png");
     SDL_Texture* iodGuiTexture = Window.loadTexture("res/img/iod_gui.png");
+    SDL_Texture* iodKeyTexture = Window.loadTexture("res/img/key.png");
+    SDL_Texture* iodKeyPressedTexture = Window.loadTexture("res/img/key_pressed.png");
     SDL_Texture* sbGuiTexture = Window.loadTexture("res/img/system_bus_gui.png");
     SDL_Texture* progressBarTexture = Window.loadTexture("res/img/progress_bar.png");
     SDL_Texture* progressBarNowTexture = Window.loadTexture("res/img/progress_bar_now.png");
@@ -184,6 +186,32 @@ int main(int argc, char* args[]) {
     TextEntity monitorLine2(Vector2f(112, 77), fontTexture, &font);
     TextEntity monitorLine3(Vector2f(112, 82), fontTexture, &font);
     TextEntity keyboardTitle(Vector2f(112, 89), fontTexture, &font);
+    vector<Entity> iodKeysEntities;
+    vector<TextEntity> iodKeysValues;
+    {vector<string> l0 = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"},
+        l1 = {"q", "w", "e", "r", "t", "y", "u", "i", "o", "p"},
+        l2 = {"a", "s", "d", "f", "g", "h", "j", "k", "l"},
+        l3 = {"z", "x", "c", "v", "b", "n", "m"};
+    for(Uint8 i = 0; i < 10; i++) {
+        iodKeysEntities.push_back(Entity(Vector2f(112 + (6 * i), 96), iodKeyTexture, 12, 12));
+        iodKeysValues.push_back(TextEntity(Vector2f(113 + (6 * i), 97), fontTexture, &font));
+        iodKeysValues[i] = l0[i];
+    }
+    for(Uint8 i = 0; i < 10; i++) {
+        iodKeysEntities.push_back(Entity(Vector2f(113 + (6 * i), 102), iodKeyTexture, 12, 12));
+        iodKeysValues.push_back(TextEntity(Vector2f(114 + (6 * i), 103), fontTexture, &font));
+        iodKeysValues[i + 10] = l1[i];
+    }
+    for(Uint8 i = 0; i < 9; i++) {
+        iodKeysEntities.push_back(Entity(Vector2f(114 + (6 * i), 108), iodKeyTexture, 12, 12));
+        iodKeysValues.push_back(TextEntity(Vector2f(115 + (6 * i), 109), fontTexture, &font));
+        iodKeysValues[i + 20] = l2[i];
+    }
+    for(Uint8 i = 0; i < 7; i++) {
+        iodKeysEntities.push_back(Entity(Vector2f(117 + (6 * i), 114), iodKeyTexture, 12, 12));
+        iodKeysValues.push_back(TextEntity(Vector2f(118 + (6 * i), 115), fontTexture, &font));
+        iodKeysValues[i + 29] = l3[i];
+    }}
     iodTitle = "IOD";
     monitorTitle = "0x0000 Monitor";
     monitorLine0 = "";
@@ -230,9 +258,9 @@ int main(int argc, char* args[]) {
             }
             msNext = msNow + msStep;
             clicked = false;
-            key = 0x0;
             //Controls
             while(SDL_PollEvent(&event)) {
+                SDL_Scancode code = event.key.keysym.scancode;
                 switch(event.type) {
                     case SDL_QUIT:
                         running = false;
@@ -261,7 +289,6 @@ int main(int argc, char* args[]) {
                             }
                         break;
                     case SDL_KEYDOWN:
-                        SDL_Scancode code = event.key.keysym.scancode;
                         if(code >= SDL_SCANCODE_A && code <= SDL_SCANCODE_Z) {
                             key = code + 93;
                         }
@@ -275,9 +302,15 @@ int main(int argc, char* args[]) {
                             key = '0';
                         }
                         else if(code == SDL_SCANCODE_KP_ENTER) {
-                            key = '\n';
+                            key = '\r';
+                        }
+                        else if(code == SDL_SCANCODE_KP_SPACE) {
+                            key = ' ';
                         }
                         IOD.input(key);
+                        break;
+                    case SDL_KEYUP:
+                        key = 0x0;
                         break;
                 }
             }
@@ -411,6 +444,127 @@ int main(int argc, char* args[]) {
                 progressBarNowEntity.setX(111 + 8 * phaseNow);
                 progressBarNextEntity.setX(111 + 8 * phaseNext);
             }
+            if(key != 0x0) {
+                Uint8 indexKey;
+                switch(key) {
+                    case '1':
+                        indexKey = 0;
+                        break;
+                    case '2':
+                        indexKey = 1;
+                        break;
+                    case '3':
+                        indexKey = 2;
+                        break;
+                    case '4':
+                        indexKey = 3;
+                        break;
+                    case '5':
+                        indexKey = 4;
+                        break;
+                    case '6':
+                        indexKey = 5;
+                        break;
+                    case '7':
+                        indexKey = 6;
+                        break;
+                    case '8':
+                        indexKey = 7;
+                        break;
+                    case '9':
+                        indexKey = 8;
+                        break;
+                    case '0':
+                        indexKey = 9;
+                        break;
+                    case 'q':
+                        indexKey = 10;
+                        break;
+                    case 'w':
+                        indexKey = 11;
+                        break;
+                    case 'e':
+                        indexKey = 12;
+                        break;
+                    case 'r':
+                        indexKey = 13;
+                        break;
+                    case 't':
+                        indexKey = 14;
+                        break;
+                    case 'y':
+                        indexKey = 15;
+                        break;
+                    case 'u':
+                        indexKey = 16;
+                        break;
+                    case 'i':
+                        indexKey = 17;
+                        break;
+                    case 'o':
+                        indexKey = 18;
+                        break;
+                    case 'p':
+                        indexKey = 19;
+                        break;
+                    case 'a':
+                        indexKey = 20;
+                        break;
+                    case 's':
+                        indexKey = 21;
+                        break;
+                    case 'd':
+                        indexKey = 22;
+                        break;
+                    case 'f':
+                        indexKey = 23;
+                        break;
+                    case 'g':
+                        indexKey = 24;
+                        break;
+                    case 'h':
+                        indexKey = 25;
+                        break;
+                    case 'j':
+                        indexKey = 26;
+                        break;
+                    case 'k':
+                        indexKey = 27;
+                        break;
+                    case 'l':
+                        indexKey = 28;
+                        break;
+                    case 'z':
+                        indexKey = 29;
+                        break;
+                    case 'x':
+                        indexKey = 30;
+                        break;
+                    case 'c':
+                        indexKey = 31;
+                        break;
+                    case 'v':
+                        indexKey = 32;
+                        break;
+                    case 'b':
+                        indexKey = 33;
+                        break;
+                    case 'n':
+                        indexKey = 34;
+                        break;
+                    case 'm':
+                        indexKey = 35;
+                        break;
+                }
+                for(Uint8 i = 0; i < 36; i++) {
+                    iodKeysEntities[i].setTexture(((i == indexKey) ? iodKeyPressedTexture : iodKeyTexture));
+                }
+            }
+            else {
+                for(Uint8 i = 0; i < 36; i++) {
+                    iodKeysEntities[i].setTexture(iodKeyTexture);
+                }
+            }
             //GUI backgrounds
             Window.renderGui(cpuGui);
             Window.renderGui(cmGui);
@@ -456,6 +610,12 @@ int main(int argc, char* args[]) {
             Window.renderText(monitorLine2);
             Window.renderText(monitorLine3);
             Window.renderText(keyboardTitle);
+            for(Entity e : iodKeysEntities) {
+                Window.renderGui(e);
+            }
+            for(TextEntity e : iodKeysValues) {
+                Window.renderText(e);
+            }
             //SB Render
             Window.renderText(abTitle);
             Window.renderText(dbTitle);

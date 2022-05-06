@@ -888,6 +888,7 @@ void InputOutputDevices::operate() {
     Uint16 address = SB->getAddress();
     Uint16 data = SB->getData();
     if(control.M) return;
+    Uint8 l0size = line0.size(), l1size = line1.size(), l2size = line2.size(), l3size = line3.size();
     if(address == 0x0 && !control.R) { //Output monitor
         Uint16 data = SB->getData();
         if(data == '\n') {
@@ -896,10 +897,37 @@ void InputOutputDevices::operate() {
             line2 = line3;
             line3 = "";
         }
-        else if(line0.size() == 20) {
-            if(line1.size() == 20) {
-                if(line2.size() == 20) {
-                    if(line3.size() == 20) {
+        else if(data == '\r') {
+            string spaces = "                    ";
+            if(l0size == 20) {
+                if(l1size == 20) {
+                    if(l2size == 20) {
+                        if(l3size == 20) {
+                            line0 = line1;
+                            line1 = line2;
+                            line2 = line3;
+                            line3 = spaces;
+                        }
+                        else {
+                            line3 += spaces.substr(0, 20 - l3size);
+                        }
+                    }
+                    else {
+                        line2 += spaces.substr(0, 20 - l3size);
+                    }
+                }
+                else {
+                    line1 += spaces.substr(0, 20 - l3size);
+                }
+            }
+            else {
+                line0 += spaces.substr(0, 20 - l3size);
+            }
+        }
+        else if(l0size == 20) {
+            if(l1size == 20) {
+                if(l2size == 20) {
+                    if(l3size == 20) {
                         line0 = line1;
                         line1 = line2;
                         line2 = line3;

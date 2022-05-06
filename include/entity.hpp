@@ -57,6 +57,11 @@ class Entity {
         */
         SDL_Texture* getTexture();
         /**
+         * @brief Function to set the texture
+         * @param tex The texture, type SDL_Texture*
+        */
+        void setTexture(SDL_Texture* tex);
+        /**
          * @brief Function to get the current frame
          * @return The frame, type SDL_Rect
         */
