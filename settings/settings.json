@@ -7,7 +7,7 @@
 	},
 	"window" : 
 	{
-	    "max_framerate" : 60,
+	  "max_framerate" : 60,
 		"fps_counter" : true,
 		"scale" : 1,
 		"gui_scale" : 1,

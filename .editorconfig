@@ -1,0 +1,21 @@
+root = true
+
+charset = utf-8
+insert_final_newline = false
+trim_trailing_whitespace = true
+end_of_line = lf
+
+[**.cpp]
+indent_style = space
+indent_size = 4
+[**.hpp]
+indent_style = space
+indent_size = 4
+
+[**.json]
+indent_style = space4
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+indent_size = 4
