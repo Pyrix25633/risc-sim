@@ -168,13 +168,13 @@ int main(int argc, char* args[]) {
     //CM
     TextEntity cmTitle(Vector2f(71, 12), fontTexture, &font);
     TextEntity ramTitle(Vector2f(71, 19), fontTexture, &font);
-    vector<TextEntity> cellsTitles;
-    vector<TextEntity> cellsValues;
+    vector<TextEntity> cellTitles;
+    vector<TextEntity> cellValues;
     for(Uint16 i = 0; i <= 0xF; i++) {
-        cellsTitles.push_back(TextEntity(Vector2f(71, 26 + 6 * i), fontTexture, &font));
-        cellsValues.push_back(TextEntity(Vector2f(91, 26 + 6 * i), fontTexture, &font));
-        cellsTitles[i] = "0x" + math::Uint16ToHexstr(i) + ":";
-        cellsValues[i] = "0x00";
+        cellTitles.push_back(TextEntity(Vector2f(71, 26 + 6 * i), fontTexture, &font));
+        cellValues.push_back(TextEntity(Vector2f(91, 26 + 6 * i), fontTexture, &font));
+        cellTitles[i] = "0x" + math::Uint16ToHexstr(i) + ":";
+        cellValues[i] = "0x00";
     }
     cmTitle = "CM";
     ramTitle = "RAM";
@@ -186,31 +186,31 @@ int main(int argc, char* args[]) {
     TextEntity monitorLine2(Vector2f(112, 77), fontTexture, &font);
     TextEntity monitorLine3(Vector2f(112, 82), fontTexture, &font);
     TextEntity keyboardTitle(Vector2f(112, 89), fontTexture, &font);
-    vector<Entity> iodKeysEntities;
-    vector<TextEntity> iodKeysValues;
+    vector<Entity> iodKeyEntities;
+    vector<TextEntity> iodKeyValues;
     {vector<string> l0 = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"},
         l1 = {"q", "w", "e", "r", "t", "y", "u", "i", "o", "p"},
         l2 = {"a", "s", "d", "f", "g", "h", "j", "k", "l"},
         l3 = {"z", "x", "c", "v", "b", "n", "m"};
     for(Uint8 i = 0; i < 10; i++) {
-        iodKeysEntities.push_back(Entity(Vector2f(112 + (6 * i), 96), iodKeyTexture, 12, 12));
-        iodKeysValues.push_back(TextEntity(Vector2f(113 + (6 * i), 97), fontTexture, &font));
-        iodKeysValues[i] = l0[i];
+        iodKeyEntities.push_back(Entity(Vector2f(112 + (6 * i), 96), iodKeyTexture, 12, 12));
+        iodKeyValues.push_back(TextEntity(Vector2f(113 + (6 * i), 97), fontTexture, &font));
+        iodKeyValues[i] = l0[i];
     }
     for(Uint8 i = 0; i < 10; i++) {
-        iodKeysEntities.push_back(Entity(Vector2f(113 + (6 * i), 102), iodKeyTexture, 12, 12));
-        iodKeysValues.push_back(TextEntity(Vector2f(114 + (6 * i), 103), fontTexture, &font));
-        iodKeysValues[i + 10] = l1[i];
+        iodKeyEntities.push_back(Entity(Vector2f(113 + (6 * i), 102), iodKeyTexture, 12, 12));
+        iodKeyValues.push_back(TextEntity(Vector2f(114 + (6 * i), 103), fontTexture, &font));
+        iodKeyValues[i + 10] = l1[i];
     }
     for(Uint8 i = 0; i < 9; i++) {
-        iodKeysEntities.push_back(Entity(Vector2f(114 + (6 * i), 108), iodKeyTexture, 12, 12));
-        iodKeysValues.push_back(TextEntity(Vector2f(115 + (6 * i), 109), fontTexture, &font));
-        iodKeysValues[i + 20] = l2[i];
+        iodKeyEntities.push_back(Entity(Vector2f(114 + (6 * i), 108), iodKeyTexture, 12, 12));
+        iodKeyValues.push_back(TextEntity(Vector2f(115 + (6 * i), 109), fontTexture, &font));
+        iodKeyValues[i + 20] = l2[i];
     }
     for(Uint8 i = 0; i < 7; i++) {
-        iodKeysEntities.push_back(Entity(Vector2f(117 + (6 * i), 114), iodKeyTexture, 12, 12));
-        iodKeysValues.push_back(TextEntity(Vector2f(118 + (6 * i), 115), fontTexture, &font));
-        iodKeysValues[i + 29] = l3[i];
+        iodKeyEntities.push_back(Entity(Vector2f(117 + (6 * i), 114), iodKeyTexture, 12, 12));
+        iodKeyValues.push_back(TextEntity(Vector2f(118 + (6 * i), 115), fontTexture, &font));
+        iodKeyValues[i + 29] = l3[i];
     }}
     iodTitle = "IOD";
     monitorTitle = "0x0000 Monitor";
@@ -264,7 +264,7 @@ int main(int argc, char* args[]) {
                 switch(event.type) {
                     case SDL_QUIT:
                         running = false;
-                        cout << logger.getStringTime() << logger.info << "Game Windwow Closed" << logger.reset << endl;
+                        cout << logger.getStringTime() << logger.info << "Windwow Closed" << logger.reset << endl;
                         break;
                     case SDL_MOUSEBUTTONDOWN:
                         if(cursorState == 0 || cursorState == 1) cursorState += 2;
@@ -381,6 +381,7 @@ int main(int argc, char* args[]) {
                     CPU.reset(settings.interpreter);
                     SB = SystemBus();
                     CM.reset(settings.interpreter.ramSize);
+                    IOD.reset();
                     CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
                 }
             }
@@ -405,12 +406,15 @@ int main(int argc, char* args[]) {
                 constantFullInstruction = false;
             }
             CPU.getPhases(phaseNow, phaseNext);
-            if((fullInstruction || constantFullInstruction) && phaseNext < 4) {
-                CPU.fetchInstruction();
-                CPU.decodeInstruction();
-                CPU.getPhases(phaseNow, phaseNext);
-                if(phaseNext == 2) CPU.fetchOperand();
-                CPU.executeInstruction();
+            if(fullInstruction || constantFullInstruction) {
+                switch(phaseNext) {
+                    case 0: CPU.fetchInstruction();
+                    case 1: CPU.decodeInstruction();
+                    case 2: 
+                        CPU.getPhases(phaseNow, phaseNext);
+                        if(phaseNext == 2) CPU.fetchOperand();
+                    case 3: CPU.executeInstruction();
+                }
                 fullInstruction = false;
                 progressBarAll = true;
             }
@@ -428,8 +432,8 @@ int main(int argc, char* args[]) {
                 }
                 for(Uint16 i = 0, j = cellsStartAddress; i < 16; j++, i++) {
                     if(j == settings.interpreter.ramSize) j = 0;
-                    cellsTitles[i] = "0x" + math::Uint16ToHexstr(j) + ":";
-                    cellsValues[i] = "0x" + math::Uint8ToHexstr(CM.get(j));
+                    cellTitles[i] = "0x" + math::Uint16ToHexstr(j) + ":";
+                    cellValues[i] = "0x" + math::Uint8ToHexstr(CM.get(j));
                 }
                 CPU.getPhases(phaseNow, phaseNext);
                 string l0, l1, l2, l3;
@@ -557,12 +561,12 @@ int main(int argc, char* args[]) {
                         break;
                 }
                 for(Uint8 i = 0; i < 36; i++) {
-                    iodKeysEntities[i].setTexture(((i == indexKey) ? iodKeyPressedTexture : iodKeyTexture));
+                    iodKeyEntities[i].setTexture(((i == indexKey) ? iodKeyPressedTexture : iodKeyTexture));
                 }
             }
             else {
                 for(Uint8 i = 0; i < 36; i++) {
-                    iodKeysEntities[i].setTexture(iodKeyTexture);
+                    iodKeyEntities[i].setTexture(iodKeyTexture);
                 }
             }
             //GUI backgrounds
@@ -596,10 +600,10 @@ int main(int argc, char* args[]) {
             //CM Render
             Window.renderText(cmTitle);
             Window.renderText(ramTitle);
-            for(TextEntity e : cellsTitles) {
+            for(TextEntity e : cellTitles) {
                 Window.renderText(e);
             }
-            for(TextEntity e : cellsValues) {
+            for(TextEntity e : cellValues) {
                 Window.renderText(e);
             }
             //IOD Render
@@ -610,10 +614,10 @@ int main(int argc, char* args[]) {
             Window.renderText(monitorLine2);
             Window.renderText(monitorLine3);
             Window.renderText(keyboardTitle);
-            for(Entity e : iodKeysEntities) {
+            for(Entity e : iodKeyEntities) {
                 Window.renderGui(e);
             }
-            for(TextEntity e : iodKeysValues) {
+            for(TextEntity e : iodKeyValues) {
                 Window.renderText(e);
             }
             //SB Render

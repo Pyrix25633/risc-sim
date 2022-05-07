@@ -394,17 +394,11 @@ void CentralProcessingUnit::executeInstruction() {
                 phaseNext = 0xFF;
             }
             switch(I.opcode) {
-                case 0x0:
-                    break;
                 case 0x1:
-                    break;
-                case 0x2:
+                    inb();
                     break;
                 case 0x3:
-                    break;
-                case 0x4:
-                    break;
-                case 0x5:
+                    outb();
                     break;
                 default:
                     phaseNext = 0xFF;
@@ -746,6 +740,24 @@ void CentralProcessingUnit::spwr() {
     SP = ALU.get(I.ra);
 }
 
+void CentralProcessingUnit::inb() {
+    SB->writeAddress(SB->getData());
+    SB->writeControl(ControlBus(READ, INPUTOUTPUT, BYTE));
+    IOD->operate();
+    Uint8 data = SB->getData();
+    ALU.load(I.ra, data);
+    SR.Z = (data == 0x0);
+    PC += 2;
+}
+
+void CentralProcessingUnit::outb() {
+    SB->writeAddress(SB->getData());
+    SB->writeControl(ControlBus(WRITE, INPUTOUTPUT, BYTE));
+    SB->writeData(ALU.get(I.ra));
+    IOD->operate();
+    PC += 2;
+}
+
 void CentralProcessingUnit::br() {
     PC = SB->getData();
 }
@@ -879,6 +891,10 @@ Uint8 CentralMemory::get(Uint16 address) {
 
 InputOutputDevices::InputOutputDevices(SystemBus* pSB) :SB(pSB) {}
 
+void InputOutputDevices::reset() {
+    line0 = line1 = line2 = line3 = "";
+}
+
 void InputOutputDevices::input(Uint8 i) {
     key = i;
 }
@@ -890,7 +906,9 @@ void InputOutputDevices::operate() {
     if(control.M) return;
     Uint8 l0size = line0.size(), l1size = line1.size(), l2size = line2.size(), l3size = line3.size();
     if(address == 0x0 && !control.R) { //Output monitor
-        Uint16 data = SB->getData();
+        Uint8 data = SB->getData();
+        string s = "!";
+        s[0] = data;
         if(data == '\n') {
             line0 = line1;
             line1 = line2;
@@ -931,22 +949,22 @@ void InputOutputDevices::operate() {
                         line0 = line1;
                         line1 = line2;
                         line2 = line3;
-                        line3 = char(data);
+                        line3 = s;
                     }
                     else {
-                        line3 += char(data);
+                        line3 += s;
                     }
                 }
                 else {
-                    line2 += char(data);
+                    line2 += s;
                 }
             }
             else {
-                line1 += char(data);
+                line1 += s;
             }
         }
         else {
-            line0 += char(data);
+            line0 += s;
         }
     }
     else if(address == 0x1 && control.R) { //Input keyboard

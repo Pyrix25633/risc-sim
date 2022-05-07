@@ -378,6 +378,14 @@ class CentralProcessingUnit{
         */
         void spwr();
         /**
+         * @brief Function to input a byte
+        */
+        void inb();
+        /**
+         * @brief Function to output a byte 
+        */
+        void outb();
+        /**
          * @brief Function to modify the program counter with an address after the instruction
         */
         void br();
@@ -463,6 +471,10 @@ class InputOutputDevices {
          * @param pSB System bus pointer
         */
         InputOutputDevices(SystemBus* pSB);
+        /**
+         * @brief Function to reset the input output devices 
+        */
+        void reset();
         /**
          * @brief Function to input a byte
          * @param i The byte
