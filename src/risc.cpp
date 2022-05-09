@@ -253,7 +253,8 @@ void CentralProcessingUnit::fetchOperand() {
                 SB->writeAddress(AR);
                 SB->writeControl(ControlBus(READ, MEMORY, WORD));
                 CM->operate();
-                SB->writeAddress(SB->getData());
+                AR = SB->getData();
+                SB->writeAddress(AR);
                 SB->writeControl(ControlBus(READ, MEMORY, WORD));
                 CM->operate();
             }
@@ -683,31 +684,39 @@ void CentralProcessingUnit::ldbr() {
 }
 
 void CentralProcessingUnit::stwa() {
-    SB->writeAddress(SB->getData());
-    SB->writeData(ALU.get(I.ra));
+    AR = SB->getData();
+    DR = ALU.get(I.ra);
+    SB->writeAddress(AR);
+    SB->writeData(DR);
     SB->writeControl(ControlBus(WRITE, MEMORY, WORD));
     CM->operate();
     PC += 2;
 }
 
 void CentralProcessingUnit::stwr() {
-    SB->writeAddress(I.rb);
-    SB->writeData(ALU.get(I.ra));
+    AR = ALU.get(I.rb);
+    DR = ALU.get(I.ra);
+    SB->writeAddress(AR);
+    SB->writeData(DR);
     SB->writeControl(ControlBus(WRITE, MEMORY, WORD));
     CM->operate();
 }
 
 void CentralProcessingUnit::stba() {
-    SB->writeAddress(SB->getData());
-    SB->writeData(ALU.get(I.ra));
+    AR = SB->getData();
+    DR = ALU.get(I.ra);
+    SB->writeAddress(AR);
+    SB->writeData(DR);
     SB->writeControl(ControlBus(WRITE, MEMORY, BYTE));
     CM->operate();
     PC += 2;
 }
 
 void CentralProcessingUnit::stbr() {
-    SB->writeAddress(I.rb);
-    SB->writeData(ALU.get(I.ra));
+    AR = ALU.get(I.rb);
+    DR = ALU.get(I.ra);
+    SB->writeAddress(AR);
+    SB->writeData(DR);
     SB->writeControl(ControlBus(WRITE, MEMORY, BYTE));
     CM->operate();
 }
@@ -717,8 +726,10 @@ void CentralProcessingUnit::cp() {
 }
 
 void CentralProcessingUnit::push() {
-    SB->writeAddress(SP);
-    SB->writeData(ALU.get(I.ra));
+    AR = SP;
+    DR = ALU.get(I.ra);
+    SB->writeAddress(AR);
+    SB->writeData(DR);
     SB->writeControl(ControlBus(WRITE, MEMORY, WORD));
     CM->operate();
     SP -= 2;
@@ -726,7 +737,8 @@ void CentralProcessingUnit::push() {
 
 void CentralProcessingUnit::pop() {
     SP += 2;
-    SB->writeAddress(SP);
+    AR = SP;
+    SB->writeAddress(AR);
     SB->writeControl(ControlBus(READ, MEMORY, WORD));
     CM->operate();
     ALU.load(I.ra, SB->getData());
@@ -741,7 +753,8 @@ void CentralProcessingUnit::spwr() {
 }
 
 void CentralProcessingUnit::inb() {
-    SB->writeAddress(SB->getData());
+    AR = SB->getData();
+    SB->writeAddress(AR);
     SB->writeControl(ControlBus(READ, INPUTOUTPUT, BYTE));
     IOD->operate();
     Uint8 data = SB->getData();
@@ -751,9 +764,11 @@ void CentralProcessingUnit::inb() {
 }
 
 void CentralProcessingUnit::outb() {
-    SB->writeAddress(SB->getData());
+    AR = SB->getData();
+    DR = ALU.get(I.ra);
+    SB->writeAddress(AR);
+    SB->writeData(DR);
     SB->writeControl(ControlBus(WRITE, INPUTOUTPUT, BYTE));
-    SB->writeData(ALU.get(I.ra));
     IOD->operate();
     PC += 2;
 }
@@ -794,9 +809,12 @@ void CentralProcessingUnit::jmpv() {
 }
 
 void CentralProcessingUnit::call() {
+    PC += 2;
     Uint16 address = SB->getData();
-    SB->writeAddress(SP);
-    SB->writeData(PC);
+    AR = SP;
+    DR = PC;
+    SB->writeAddress(AR);
+    SB->writeData(DR);
     SB->writeControl(ControlBus(WRITE, MEMORY, WORD));
     CM->operate();
     SP -= 2;
@@ -805,7 +823,8 @@ void CentralProcessingUnit::call() {
 
 void CentralProcessingUnit::ret() {
     SP += 2;
-    SB->writeAddress(SP);
+    AR = SP;
+    SB->writeAddress(AR);
     SB->writeControl(ControlBus(READ, MEMORY, WORD));
     CM->operate();
     PC = SB->getData();
