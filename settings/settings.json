@@ -5,7 +5,7 @@
 		"start": 0
 	},
 	"window": {
-	  "max_framerate": 60,
+	  "max_framerate": 120,
 		"fps_counter": true,
 		"scale": 1,
 		"gui_scale": 1,
@@ -15,7 +15,7 @@
 			"gpu_acceleration": true,
 			"software_fallback": false,
 			"target_texture": true,
-			"vsync": false
+			"vsync": true
 		}
 	},
 	"console": {

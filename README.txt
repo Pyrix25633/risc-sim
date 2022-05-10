@@ -100,6 +100,17 @@
 ║  │  - binary: 01001011dddd0000    hexadecimal: 4Bd0    status register: Z:D, N:D, C:0, V:0    │   ║
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
+║  │ Input-Output Group                                                                         │   ║
+║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
+║  │ + INB: to input a byte from keyboard, if it is 0 (Z = 1) no key was pressed                │   ║
+║  │  - binary: 10000001dddd0000    hexadecimal: 81d0    status register: Z:D, N:-, C:-, V:-    │   ║
+║  │ + OUTB: to output a byte to monitor                                                        │   ║
+║  │  - binary: 10000011ssss0000    hexadecimal: 83s0    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ ! WARNING: I/O instructions have to be followed by the address (x16) of the I/O device     │   ║
+║  │ ! \n (0x0A) will move all lines up by one, but will not move to a new line                 │   ║
+║  │ ! \r (0x0D) will move to a new line, but will not move all lines up by one                 │   ║
+║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
+║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Control Group                                                                              │   ║
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
 ║  │ + BR: writes an address, which is after the instruction, in the program counter            │   ║

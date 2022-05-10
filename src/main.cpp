@@ -311,6 +311,7 @@ int main(int argc, char* args[]) {
                         break;
                     case SDL_KEYUP:
                         key = 0x0;
+                        IOD.input(key);
                         break;
                 }
             }
@@ -565,8 +566,8 @@ int main(int argc, char* args[]) {
                 }
             }
             else {
-                for(Uint8 i = 0; i < 36; i++) {
-                    iodKeyEntities[i].setTexture(iodKeyTexture);
+                for(Entity &e : iodKeyEntities) {
+                    e.setTexture(iodKeyTexture);
                 }
             }
             //GUI backgrounds
@@ -591,19 +592,19 @@ int main(int argc, char* args[]) {
             Window.renderText(arValue);
             Window.renderText(drValue);
             Window.renderText(spValue);
-            for(TextEntity e : registriesTitles) {
+            for(TextEntity &e : registriesTitles) {
                 Window.renderText(e);
             }
-            for(TextEntity e : registriesValues) {
+            for(TextEntity &e : registriesValues) {
                 Window.renderText(e);
             }
             //CM Render
             Window.renderText(cmTitle);
             Window.renderText(ramTitle);
-            for(TextEntity e : cellTitles) {
+            for(TextEntity &e : cellTitles) {
                 Window.renderText(e);
             }
-            for(TextEntity e : cellValues) {
+            for(TextEntity &e : cellValues) {
                 Window.renderText(e);
             }
             //IOD Render
@@ -614,10 +615,10 @@ int main(int argc, char* args[]) {
             Window.renderText(monitorLine2);
             Window.renderText(monitorLine3);
             Window.renderText(keyboardTitle);
-            for(Entity e : iodKeyEntities) {
+            for(Entity &e : iodKeyEntities) {
                 Window.renderGui(e);
             }
-            for(TextEntity e : iodKeyValues) {
+            for(TextEntity &e : iodKeyValues) {
                 Window.renderText(e);
             }
             //SB Render

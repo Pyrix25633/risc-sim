@@ -950,15 +950,15 @@ void InputOutputDevices::operate() {
                         }
                     }
                     else {
-                        line2 += spaces.substr(0, 20 - l3size);
+                        line2 += spaces.substr(0, 20 - l2size);
                     }
                 }
                 else {
-                    line1 += spaces.substr(0, 20 - l3size);
+                    line1 += spaces.substr(0, 20 - l1size);
                 }
             }
             else {
-                line0 += spaces.substr(0, 20 - l3size);
+                line0 += spaces.substr(0, 20 - l0size);
             }
         }
         else if(l0size == 20) {
