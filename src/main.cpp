@@ -62,12 +62,13 @@ int main(int argc, char* args[]) {
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow Window("RISC-CPU SIMULATOR v0.1.0", settings.win.width, settings.win.height
-        , flags, &logger, &settings, "res/img/icon.png");
+    RenderWindow Window("RISC-CPU SIMULATOR v1.0.0", settings.win.width, settings.win.height
+        , flags, &logger, &settings, "res/img/icon-64.png");
     SDL_ShowCursor(0);
 
     //Loading the textures
     SDL_Texture* cursorTexture = Window.loadTexture("res/img/cursor.png");
+    SDL_Texture* iconTexture = Window.loadTexture("res/img/icon.png");
     SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
     SDL_Texture* cpuGuiTexture = Window.loadTexture("res/img/cpu_gui.png");
     SDL_Texture* cmGuiTexture = Window.loadTexture("res/img/cm_gui.png");
@@ -102,14 +103,14 @@ int main(int argc, char* args[]) {
     instNameTitle = "Instruction name:";
     instNameValue = "-----";
     //Progress bar
-    TextEntity progressBarIfTitle(Vector2f(111, 1), fontTexture, &font);
-    TextEntity progressBarIdTitle(Vector2f(119, 1), fontTexture, &font);
-    TextEntity progressBarOfTitle(Vector2f(127, 1), fontTexture, &font);
-    TextEntity progressBarIeTitle(Vector2f(135, 1), fontTexture, &font);
-    Entity progressBarEntity(Vector2f(111, 4), progressBarTexture, 16, 64);
-    Entity progressBarNowEntity(Vector2f(111, 4), progressBarNowTexture);
-    Entity progressBarNextEntity(Vector2f(119, 4), progressBarNextTexture);
-    Entity progressBarAllEntity(Vector2f(111, 4), progressBarAllTexture, 16, 64);
+    TextEntity progressBarIfTitle(Vector2f(117, 1), fontTexture, &font);
+    TextEntity progressBarIdTitle(Vector2f(125, 1), fontTexture, &font);
+    TextEntity progressBarOfTitle(Vector2f(133, 1), fontTexture, &font);
+    TextEntity progressBarIeTitle(Vector2f(141, 1), fontTexture, &font);
+    Entity progressBarEntity(Vector2f(117, 4), progressBarTexture, 16, 64);
+    Entity progressBarNowEntity(Vector2f(117, 4), progressBarNowTexture);
+    Entity progressBarNextEntity(Vector2f(125, 4), progressBarNextTexture);
+    Entity progressBarAllEntity(Vector2f(117, 4), progressBarAllTexture, 16, 64);
     //Buttons
     Button fastButton(Vector2f(111, 12), HitBox2d(111, 12, 7, 7), fastTexture, fastPressedTexture);
     Button playButton(Vector2f(120, 12), HitBox2d(120, 12, 7, 7), playTexture, playPressedTexture);
@@ -118,6 +119,14 @@ int main(int argc, char* args[]) {
     Button reloadButton(Vector2f(147, 12), HitBox2d(147, 12, 7, 7), reloadTexture, reloadPressedTexture);
     fpsCounter = fpsText + fpsString;
     fpsCounterEntity = fpsCounter;
+    //Icon
+    Entity iconEntity(Vector2f(157, 2), iconTexture, 32, 32);
+    TextEntity creditsText0(Vector2f(111, 26), fontTexture, &font);
+    TextEntity creditsText1(Vector2f(111, 32), fontTexture, &font);
+    TextEntity creditsText2(Vector2f(111, 38), fontTexture, &font);
+    creditsText0 = "Reduced Instruction";
+    creditsText1 = "Set Computer";
+    creditsText2 = "Made by Pyrix25633";
     //CPU
     TextEntity cpuTitle(Vector2f(7, 12), fontTexture, &font);
     TextEntity cuTitle(Vector2f(7, 19), fontTexture, &font);
@@ -384,6 +393,7 @@ int main(int argc, char* args[]) {
                     CM.reset(settings.interpreter.ramSize);
                     IOD.reset();
                     CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
+                    msStep = 1000 / settings.win.maxFps;
                 }
             }
             if(inHitboxes > 0) {
@@ -446,8 +456,8 @@ int main(int argc, char* args[]) {
                 abValue = "0x" + math::Uint16ToHexstr(SB.getAddress());
                 dbValue = "0x" + math::Uint16ToHexstr(SB.getData());
                 cbValue = math::ControlBusToHexstr(SB.getControl());
-                progressBarNowEntity.setX(111 + 8 * phaseNow);
-                progressBarNextEntity.setX(111 + 8 * phaseNext);
+                progressBarNowEntity.setX(117 + 8 * phaseNow);
+                progressBarNextEntity.setX(117 + 8 * phaseNext);
             }
             if(key != 0x0) {
                 Uint8 indexKey;
@@ -652,6 +662,12 @@ int main(int argc, char* args[]) {
             Window.renderButton(nextButton);
             Window.renderButton(pauseButton);
             Window.renderButton(reloadButton);
+            //Icon
+            Window.renderGui(iconEntity);
+            Window.renderText(creditsText0);
+            Window.renderText(creditsText1);
+            Window.renderText(creditsText2);
+            //Display
             Window.renderCursor(cursorEntity);
             Window.display();
         }
@@ -662,7 +678,7 @@ int main(int argc, char* args[]) {
     return 0;
 }
 
-//For stupid Windows OS
+//For Windows OS
 int WinMain(int argc, char* args[]) {
     return main(argc, args);
 }

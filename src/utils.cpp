@@ -69,7 +69,8 @@ ostream& operator << (ostream& os, const Settings& settings) {
             << "FPS Counter: " << ((settings.win.fpsCounter) ? "true" : "false") << endl
             << "Log File: " << ((settings.console.log) ? "true" : "false") << endl
             << "Output Color: " << ((settings.console.color) ? "true" : "false") << endl
-            << "Interpreter File: " << settings.interpreter.file << endl
+            << "Interpreter File: " << settings.interpreter.file
+            << " Type: " << ((settings.interpreter.binary) ? "binary" : "hexadecimal") << endl
             << "Interpreter Ram Size: " << settings.interpreter.ramSize << endl
             << "Interpreter Start Address: " << settings.interpreter.start;
 }
@@ -125,7 +126,7 @@ Settings JsonManager::getSettings() {
     settings.console.color = console["output_color"].asBool();
     settings.interpreter.file = interpreter["file"].asString();
     if(settings.interpreter.file == "") {
-        settings.interpreter.file = "binary.bnr";
+        settings.interpreter.file = "binary.bin";
         interpreter["file"] = "binary.bin";
         errors++;
     }
@@ -143,10 +144,8 @@ Settings JsonManager::getSettings() {
     }
     string binFile = settings.interpreter.file;
     Uint16 lenght = binFile.length();
-    if(binFile[lenght - 3] == '.' && binFile[lenght - 2] == 'b' && binFile[lenght - 1] == 'i' && binFile[lenght] == 'n')
-        settings.interpreter.binary = true;
-    else
-        settings.interpreter.binary = false;
+    settings.interpreter.binary = (binFile[lenght - 4] == '.' && binFile[lenght - 3] == 'b'
+        && binFile[lenght - 2] == 'i' && binFile[lenght - 1] == 'n');
     file.close();
     if(errors > 0) {
         ofstream outFile("settings/settings.json");

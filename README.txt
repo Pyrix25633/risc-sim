@@ -52,9 +52,9 @@
 ║  │  - binary: 00110000ddddaaaa    hexadecimal: 30da    status register: Z:D, N:D, C:-, V:-    │   ║
 ║  │ + LDBI: loads a byte, that is after the instruction, in "d"                                │   ║
 ║  │  - binary: 00010001dddd0000    hexadecimal: 11d0    status register: Z:D, N:-, C:-, V:-    │   ║
-║  │ + LDWA: loads a byte, whose address is after the instruction, in "d"                       │   ║
+║  │ + LDBA: loads a byte, whose address is after the instruction, in "d"                       │   ║
 ║  │  - binary: 00100001dddd0000    hexadecimal: 21d0    status register: Z:D, N:-, C:-, V:-    │   ║
-║  │ + LDWR: loads a byte, whose address is in the register "a", in "d"                         │   ║
+║  │ + LDBR: loads a byte, whose address is in the register "a", in "d"                         │   ║
 ║  │  - binary: 00110001ddddaaaa    hexadecimal: 31da    status register: Z:D, N:-, C:-, V:-    │   ║
 ║  │ + STWA: stores a word, from "s", to an address which is after the instruction              │   ║
 ║  │  - binary: 00100010ssss0000    hexadecimal: 22d0    status register: Z:-, N:-, C:-, V:-    │   ║

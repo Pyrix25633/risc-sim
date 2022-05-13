@@ -83,7 +83,7 @@ void ArithmeticLogicUnit::add(Uint8 d, Uint8 s) {
     R[d] += R[s];
     SR->C = (resc > 0xFFFF);
     SR->V = (c != res);
-    SR->N = (res < 0x0);
+    SR->N = (Int16(R[d]) < 0x0);
     SR->Z = (R[d] == 0x0);
 }
 
@@ -197,6 +197,10 @@ void CentralProcessingUnit::reset(InterpreterSettings settings) {
     AR = 0x0;
     DR = 0x0;
     ALU.reset();
+    SR.Z = false;
+    SR.N = false;
+    SR.C = false;
+    SR.V = false;
 }
 
 void CentralProcessingUnit::fetchInstruction() {
