@@ -1,0 +1,14 @@
+{
+    "latest": "1.0.0",
+    "keep": [
+        "binaries/",
+        "settings/"
+    ],
+    "releases": [
+        {
+            "tag": "1.0.0",
+            "linux": "risc-sim-1.0.0-linux-x64.tar.gz",
+            "win": "risc-sim-1.0.0-windows-x64.zip"
+        }
+    ]
+}
