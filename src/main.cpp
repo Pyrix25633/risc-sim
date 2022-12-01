@@ -62,34 +62,34 @@ int main(int argc, char* args[]) {
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow Window("RISC-CPU SIMULATOR v1.0.0", settings.win.width, settings.win.height
-        , flags, &logger, &settings, "res/img/icon-64.png");
+    RenderWindow window("RISC-CPU SIMULATOR v1.0.0", settings.win.width, settings.win.height,
+                        flags, &logger, &settings, "res/img/icon-64.png");
     SDL_ShowCursor(0);
 
     //Loading the textures
-    SDL_Texture* cursorTexture = Window.loadTexture("res/img/cursor.png");
-    SDL_Texture* iconTexture = Window.loadTexture("res/img/icon.png");
-    SDL_Texture* fontTexture = Window.loadTexture("res/img/font.png");
-    SDL_Texture* cpuGuiTexture = Window.loadTexture("res/img/cpu_gui.png");
-    SDL_Texture* cmGuiTexture = Window.loadTexture("res/img/cm_gui.png");
-    SDL_Texture* iodGuiTexture = Window.loadTexture("res/img/iod_gui.png");
-    SDL_Texture* iodKeyTexture = Window.loadTexture("res/img/key.png");
-    SDL_Texture* iodKeyPressedTexture = Window.loadTexture("res/img/key_pressed.png");
-    SDL_Texture* sbGuiTexture = Window.loadTexture("res/img/system_bus_gui.png");
-    SDL_Texture* progressBarTexture = Window.loadTexture("res/img/progress_bar.png");
-    SDL_Texture* progressBarNowTexture = Window.loadTexture("res/img/progress_bar_now.png");
-    SDL_Texture* progressBarNextTexture = Window.loadTexture("res/img/progress_bar_next.png");
-    SDL_Texture* progressBarAllTexture = Window.loadTexture("res/img/progress_bar_all.png");
-    SDL_Texture* fastTexture = Window.loadTexture("res/img/fast_button.png");
-    SDL_Texture* playTexture = Window.loadTexture("res/img/play_button.png");
-    SDL_Texture* nextTexture = Window.loadTexture("res/img/next_button.png");
-    SDL_Texture* pauseTexture = Window.loadTexture("res/img/pause_button.png");
-    SDL_Texture* reloadTexture = Window.loadTexture("res/img/reload_button.png");
-    SDL_Texture* fastPressedTexture = Window.loadTexture("res/img/fast_button_pressed.png");
-    SDL_Texture* playPressedTexture = Window.loadTexture("res/img/play_button_pressed.png");
-    SDL_Texture* nextPressedTexture = Window.loadTexture("res/img/next_button_pressed.png");
-    SDL_Texture* pausePressedTexture = Window.loadTexture("res/img/pause_button_pressed.png");
-    SDL_Texture* reloadPressedTexture = Window.loadTexture("res/img/reload_button_pressed.png");
+    SDL_Texture* cursorTexture = window.loadTexture("res/img/cursor.png");
+    SDL_Texture* iconTexture = window.loadTexture("res/img/icon.png");
+    SDL_Texture* fontTexture = window.loadTexture("res/img/font.png");
+    SDL_Texture* cpuGuiTexture = window.loadTexture("res/img/cpu_gui.png");
+    SDL_Texture* cmGuiTexture = window.loadTexture("res/img/cm_gui.png");
+    SDL_Texture* iodGuiTexture = window.loadTexture("res/img/iod_gui.png");
+    SDL_Texture* iodKeyTexture = window.loadTexture("res/img/key.png");
+    SDL_Texture* iodKeyPressedTexture = window.loadTexture("res/img/key_pressed.png");
+    SDL_Texture* sbGuiTexture = window.loadTexture("res/img/system_bus_gui.png");
+    SDL_Texture* progressBarTexture = window.loadTexture("res/img/progress_bar.png");
+    SDL_Texture* progressBarNowTexture = window.loadTexture("res/img/progress_bar_now.png");
+    SDL_Texture* progressBarNextTexture = window.loadTexture("res/img/progress_bar_next.png");
+    SDL_Texture* progressBarAllTexture = window.loadTexture("res/img/progress_bar_all.png");
+    SDL_Texture* fastTexture = window.loadTexture("res/img/fast_button.png");
+    SDL_Texture* playTexture = window.loadTexture("res/img/play_button.png");
+    SDL_Texture* nextTexture = window.loadTexture("res/img/next_button.png");
+    SDL_Texture* pauseTexture = window.loadTexture("res/img/pause_button.png");
+    SDL_Texture* reloadTexture = window.loadTexture("res/img/reload_button.png");
+    SDL_Texture* fastPressedTexture = window.loadTexture("res/img/fast_button_pressed.png");
+    SDL_Texture* playPressedTexture = window.loadTexture("res/img/play_button_pressed.png");
+    SDL_Texture* nextPressedTexture = window.loadTexture("res/img/next_button_pressed.png");
+    SDL_Texture* pausePressedTexture = window.loadTexture("res/img/pause_button_pressed.png");
+    SDL_Texture* reloadPressedTexture = window.loadTexture("res/img/reload_button_pressed.png");
     Entity cursorEntity(Vector2f(0, 0), cursorTexture);
     TextEntity fpsCounterEntity(Vector2f(3, 3), fontTexture, &font);
     //GUI backgrounds
@@ -245,6 +245,7 @@ int main(int argc, char* args[]) {
     //Running
     previousSecond = SDL_GetTicks() / 1000;
     while(running) {
+        window.calculateScale();
         msNow = SDL_GetTicks();
         if(!(msNext <= msNow)) {
             //Framerate regulation
@@ -326,8 +327,8 @@ int main(int argc, char* args[]) {
             }
             //Actual processing
             SDL_GetMouseState(&cursorPosition.x, &cursorPosition.y);
-            guiCursorPosition.x = (cursorPosition.x / settings.win.scale / 4);
-            guiCursorPosition.y = (cursorPosition.y / settings.win.scale / 4);
+            guiCursorPosition.x = (cursorPosition.x / settings.win.scale / window.getScale());
+            guiCursorPosition.y = (cursorPosition.y / settings.win.scale / window.getScale());
             inHitboxes = 0;
             if(guiCursorPosition == *fastButton.getHitBox()) {
                 if(cursorState >= 2) fastButton.changePressed();
@@ -406,9 +407,9 @@ int main(int argc, char* args[]) {
             }
             cursorEntity.setXY(cursorPosition.x, cursorPosition.y);
             cursorEntity.setCurrentFrame(cursor.pointers[cursorState]);
-            Window.clear();
+            window.clear();
             if(settings.win.fpsCounter) {
-                Window.renderText(fpsCounterEntity);
+                window.renderText(fpsCounterEntity);
             }
             
             instNameValue = CPU.getInstName();
@@ -462,114 +463,42 @@ int main(int argc, char* args[]) {
             if(key != 0x0) {
                 Uint8 indexKey;
                 switch(key) {
-                    case '1':
-                        indexKey = 0;
-                        break;
-                    case '2':
-                        indexKey = 1;
-                        break;
-                    case '3':
-                        indexKey = 2;
-                        break;
-                    case '4':
-                        indexKey = 3;
-                        break;
-                    case '5':
-                        indexKey = 4;
-                        break;
-                    case '6':
-                        indexKey = 5;
-                        break;
-                    case '7':
-                        indexKey = 6;
-                        break;
-                    case '8':
-                        indexKey = 7;
-                        break;
-                    case '9':
-                        indexKey = 8;
-                        break;
-                    case '0':
-                        indexKey = 9;
-                        break;
-                    case 'q':
-                        indexKey = 10;
-                        break;
-                    case 'w':
-                        indexKey = 11;
-                        break;
-                    case 'e':
-                        indexKey = 12;
-                        break;
-                    case 'r':
-                        indexKey = 13;
-                        break;
-                    case 't':
-                        indexKey = 14;
-                        break;
-                    case 'y':
-                        indexKey = 15;
-                        break;
-                    case 'u':
-                        indexKey = 16;
-                        break;
-                    case 'i':
-                        indexKey = 17;
-                        break;
-                    case 'o':
-                        indexKey = 18;
-                        break;
-                    case 'p':
-                        indexKey = 19;
-                        break;
-                    case 'a':
-                        indexKey = 20;
-                        break;
-                    case 's':
-                        indexKey = 21;
-                        break;
-                    case 'd':
-                        indexKey = 22;
-                        break;
-                    case 'f':
-                        indexKey = 23;
-                        break;
-                    case 'g':
-                        indexKey = 24;
-                        break;
-                    case 'h':
-                        indexKey = 25;
-                        break;
-                    case 'j':
-                        indexKey = 26;
-                        break;
-                    case 'k':
-                        indexKey = 27;
-                        break;
-                    case 'l':
-                        indexKey = 28;
-                        break;
-                    case 'z':
-                        indexKey = 29;
-                        break;
-                    case 'x':
-                        indexKey = 30;
-                        break;
-                    case 'c':
-                        indexKey = 31;
-                        break;
-                    case 'v':
-                        indexKey = 32;
-                        break;
-                    case 'b':
-                        indexKey = 33;
-                        break;
-                    case 'n':
-                        indexKey = 34;
-                        break;
-                    case 'm':
-                        indexKey = 35;
-                        break;
+                    case '1': indexKey = 0; break;
+                    case '2': indexKey = 1; break;
+                    case '3': indexKey = 2; break;
+                    case '4': indexKey = 3; break;
+                    case '5': indexKey = 4; break;
+                    case '6': indexKey = 5; break;
+                    case '7': indexKey = 6; break;
+                    case '8': indexKey = 7; break;
+                    case '9': indexKey = 8; break;
+                    case '0': indexKey = 9; break;
+                    case 'q': indexKey = 10; break;
+                    case 'w': indexKey = 11; break;
+                    case 'e': indexKey = 12; break;
+                    case 'r': indexKey = 13; break;
+                    case 't': indexKey = 14; break;
+                    case 'y': indexKey = 15; break;
+                    case 'u': indexKey = 16; break;
+                    case 'i': indexKey = 17; break;
+                    case 'o': indexKey = 18; break;
+                    case 'p': indexKey = 19; break;
+                    case 'a': indexKey = 20; break;
+                    case 's': indexKey = 21; break;
+                    case 'd': indexKey = 22; break;
+                    case 'f': indexKey = 23; break;
+                    case 'g': indexKey = 24; break;
+                    case 'h': indexKey = 25; break;
+                    case 'j': indexKey = 26; break;
+                    case 'k': indexKey = 27; break;
+                    case 'l': indexKey = 28; break;
+                    case 'z': indexKey = 29; break;
+                    case 'x': indexKey = 30; break;
+                    case 'c': indexKey = 31; break;
+                    case 'v': indexKey = 32; break;
+                    case 'b': indexKey = 33; break;
+                    case 'n': indexKey = 34; break;
+                    case 'm': indexKey = 35; break;
                 }
                 for(Uint8 i = 0; i < 36; i++) {
                     iodKeyEntities[i].setTexture(((i == indexKey) ? iodKeyPressedTexture : iodKeyTexture));
@@ -581,99 +510,99 @@ int main(int argc, char* args[]) {
                 }
             }
             //GUI backgrounds
-            Window.renderGui(cpuGui);
-            Window.renderGui(cmGui);
-            Window.renderGui(iodGui);
-            Window.renderGui(sbGui);
+            window.renderGui(cpuGui);
+            window.renderGui(cmGui);
+            window.renderGui(iodGui);
+            window.renderGui(sbGui);
             //CPU Render
-            Window.renderText(cpuTitle);
-            Window.renderText(cuTitle);
-            Window.renderText(aluTitle);
-            Window.renderText(pcTitle);
-            Window.renderText(irTitle);
-            Window.renderText(srTitle);
-            Window.renderText(srElements);
-            Window.renderText(arTitle);
-            Window.renderText(drTitle);
-            Window.renderText(spTitle);
-            Window.renderText(pcValue);
-            Window.renderText(irValue);
-            Window.renderText(srValue);
-            Window.renderText(arValue);
-            Window.renderText(drValue);
-            Window.renderText(spValue);
+            window.renderText(cpuTitle);
+            window.renderText(cuTitle);
+            window.renderText(aluTitle);
+            window.renderText(pcTitle);
+            window.renderText(irTitle);
+            window.renderText(srTitle);
+            window.renderText(srElements);
+            window.renderText(arTitle);
+            window.renderText(drTitle);
+            window.renderText(spTitle);
+            window.renderText(pcValue);
+            window.renderText(irValue);
+            window.renderText(srValue);
+            window.renderText(arValue);
+            window.renderText(drValue);
+            window.renderText(spValue);
             for(TextEntity &e : registriesTitles) {
-                Window.renderText(e);
+                window.renderText(e);
             }
             for(TextEntity &e : registriesValues) {
-                Window.renderText(e);
+                window.renderText(e);
             }
             //CM Render
-            Window.renderText(cmTitle);
-            Window.renderText(ramTitle);
+            window.renderText(cmTitle);
+            window.renderText(ramTitle);
             for(TextEntity &e : cellTitles) {
-                Window.renderText(e);
+                window.renderText(e);
             }
             for(TextEntity &e : cellValues) {
-                Window.renderText(e);
+                window.renderText(e);
             }
             //IOD Render
-            Window.renderText(iodTitle);
-            Window.renderText(monitorTitle);
-            Window.renderText(monitorLine0);
-            Window.renderText(monitorLine1);
-            Window.renderText(monitorLine2);
-            Window.renderText(monitorLine3);
-            Window.renderText(keyboardTitle);
+            window.renderText(iodTitle);
+            window.renderText(monitorTitle);
+            window.renderText(monitorLine0);
+            window.renderText(monitorLine1);
+            window.renderText(monitorLine2);
+            window.renderText(monitorLine3);
+            window.renderText(keyboardTitle);
             for(Entity &e : iodKeyEntities) {
-                Window.renderGui(e);
+                window.renderGui(e);
             }
             for(TextEntity &e : iodKeyValues) {
-                Window.renderText(e);
+                window.renderText(e);
             }
             //SB Render
-            Window.renderText(abTitle);
-            Window.renderText(dbTitle);
-            Window.renderText(cbTitle);
-            Window.renderText(abValue);
-            Window.renderText(dbValue);
-            Window.renderText(cbValue);
+            window.renderText(abTitle);
+            window.renderText(dbTitle);
+            window.renderText(cbTitle);
+            window.renderText(abValue);
+            window.renderText(dbValue);
+            window.renderText(cbValue);
             //Instruction name
-            Window.renderText(instNameTitle);
-            Window.renderText(instNameValue);
+            window.renderText(instNameTitle);
+            window.renderText(instNameValue);
             //Progress bar
-            Window.renderText(progressBarIfTitle);
-            Window.renderText(progressBarIdTitle);
-            Window.renderText(progressBarOfTitle);
-            Window.renderText(progressBarIeTitle);
-            Window.renderGui(progressBarEntity);
+            window.renderText(progressBarIfTitle);
+            window.renderText(progressBarIdTitle);
+            window.renderText(progressBarOfTitle);
+            window.renderText(progressBarIeTitle);
+            window.renderGui(progressBarEntity);
             if(phaseNow < 4 && !progressBarAll) {
-                Window.renderGui(progressBarNowEntity);
+                window.renderGui(progressBarNowEntity);
             }
             if(phaseNext < 4 && !progressBarAll) {
-                Window.renderGui(progressBarNextEntity);
+                window.renderGui(progressBarNextEntity);
             }
             if(progressBarAll) {
-                Window.renderGui(progressBarAllEntity);
+                window.renderGui(progressBarAllEntity);
             }
             //Buttons
-            Window.renderButton(fastButton);
-            Window.renderButton(playButton);
-            Window.renderButton(nextButton);
-            Window.renderButton(pauseButton);
-            Window.renderButton(reloadButton);
+            window.renderButton(fastButton);
+            window.renderButton(playButton);
+            window.renderButton(nextButton);
+            window.renderButton(pauseButton);
+            window.renderButton(reloadButton);
             //Icon
-            Window.renderGui(iconEntity);
-            Window.renderText(creditsText0);
-            Window.renderText(creditsText1);
-            Window.renderText(creditsText2);
+            window.renderGui(iconEntity);
+            window.renderText(creditsText0);
+            window.renderText(creditsText1);
+            window.renderText(creditsText2);
             //Display
-            Window.renderCursor(cursorEntity);
-            Window.display();
+            window.renderCursor(cursorEntity);
+            window.display();
         }
     }
-    //Quitting Window
-    Window.cleanUp();
+    //Quitting window
+    window.cleanUp();
     SDL_Quit();
     return 0;
 }

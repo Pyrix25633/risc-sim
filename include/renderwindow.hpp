@@ -36,11 +36,6 @@ class RenderWindow {
         */
         void clear();
         /**
-         * @brief Function to render something
-         * @param entity The entity to render, type Entity
-        */
-        void render(Entity& entity);
-        /**
          * @brief Function to render a gui
          * @param entity The gui entity to render, type Entity
         */
@@ -68,9 +63,19 @@ class RenderWindow {
          * @brief Function to destroy the window and clean up everything
         */
         void cleanUp();
+        /**
+         * @brief Function to calculate the scale
+        */
+        void calculateScale();
+        /**
+         * @brief Function to get the scale
+         * @return The scale, type Uint8
+        */
+        Uint8 getScale();
     private:
-        SDL_Window* Window;
-        SDL_Renderer* Renderer;
+        SDL_Window* window;
+        SDL_Renderer* renderer;
         Logger* logger;
         Settings* settings;
+        Uint8 scale;
 };

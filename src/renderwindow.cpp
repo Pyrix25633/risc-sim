@@ -7,13 +7,13 @@
 using namespace std;
 
 RenderWindow::RenderWindow(const char* title, int width, int height, Uint32 flags, Logger* plogger, Settings* psettings, const char* icon)
-    :Window(NULL), Renderer(NULL), logger(plogger), settings(psettings) {
-    //Initializing the Window
-    Window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height,
+    :window(NULL), renderer(NULL), logger(plogger), settings(psettings) {
+    //Initializing the window
+    window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height,
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL);
     //Check for errors
     cout << logger->getStringTime();
-    if(Window == NULL) {
+    if(window == NULL) {
         cout << logger->error << "Window Init FAILED! SDL_ERROR: " << SDL_GetError() << logger->reset << endl;
     }
     else {
@@ -28,17 +28,17 @@ RenderWindow::RenderWindow(const char* title, int width, int height, Uint32 flag
     else {
         cout << logger->success << "Icon " << icon << " Load SUCCEEDED" << logger->reset << endl;
     }
-    SDL_SetWindowIcon(Window, iconSurface);
+    SDL_SetWindowIcon(window, iconSurface);
     //Initializing the Renderer
-    Renderer = SDL_CreateRenderer(Window, -1, flags);
-    SDL_SetRenderDrawColor(Renderer, 50, 50, 50, 255);
+    renderer = SDL_CreateRenderer(window, -1, flags);
+    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
 }
 
 SDL_Texture* RenderWindow::loadTexture(const char* filePath) {
     //Initializing texture
     SDL_Texture* texture = NULL;
     //Check for errors
-    texture = IMG_LoadTexture(Renderer, filePath);
+    texture = IMG_LoadTexture(renderer, filePath);
     cout << logger->getStringTime();
     if(texture == NULL) {
         cout << logger->warning << "Texture Load FAILED! SDL_ERROR: " << SDL_GetError() << logger->reset << endl;
@@ -50,22 +50,7 @@ SDL_Texture* RenderWindow::loadTexture(const char* filePath) {
 }
 
 void RenderWindow::clear() {
-    SDL_RenderClear(Renderer);
-}
-
-void RenderWindow::render(Entity& entity) {
-    SDL_Rect src;
-    src.x = entity.getCurrentFrame().x;
-    src.y = entity.getCurrentFrame().y;
-    src.w = entity.getCurrentFrame().w;
-    src.h = entity.getCurrentFrame().h;
-    SDL_Rect dst;
-    dst.x = entity.getPos().x * settings->win.scale * 4;
-    dst.y = entity.getPos().y * settings->win.scale * 4;
-    dst.w = entity.getCurrentFrame().w * settings->win.scale * 4;
-    dst.h = entity.getCurrentFrame().h * settings->win.scale * 4;
-
-    SDL_RenderCopy(Renderer, entity.getTexture(), &src, &dst);
+    SDL_RenderClear(renderer);
 }
 
 void RenderWindow::renderGui(Entity& entity) {
@@ -75,12 +60,12 @@ void RenderWindow::renderGui(Entity& entity) {
     src.w = entity.getCurrentFrame().w;
     src.h = entity.getCurrentFrame().h;
     SDL_Rect dst;
-    dst.x = entity.getPos().x * settings->win.scale * 4;
-    dst.y = entity.getPos().y * settings->win.scale * 4;
-    dst.w = entity.getCurrentFrame().w * settings->win.guiScale * 2;
-    dst.h = entity.getCurrentFrame().h * settings->win.guiScale * 2;
+    dst.x = entity.getPos().x * settings->win.scale * scale;
+    dst.y = entity.getPos().y * settings->win.scale * scale;
+    dst.w = entity.getCurrentFrame().w * settings->win.guiScale * ((float)scale / 2);
+    dst.h = entity.getCurrentFrame().h * settings->win.guiScale * ((float)scale / 2);
 
-    SDL_RenderCopy(Renderer, entity.getTexture(), &src, &dst);
+    SDL_RenderCopy(renderer, entity.getTexture(), &src, &dst);
 }
 
 void RenderWindow::renderText(TextEntity& textEntity) {
@@ -97,12 +82,12 @@ void RenderWindow::renderButton(Button& button) {
     src.w = button.getCurrentFrame().w;
     src.h = button.getCurrentFrame().h;
     SDL_Rect dst;
-    dst.x = button.getPos().x * settings->win.scale * 4;
-    dst.y = button.getPos().y * settings->win.scale * 4;
-    dst.w = button.getCurrentFrame().w * settings->win.guiScale * 2;
-    dst.h = button.getCurrentFrame().h * settings->win.guiScale * 2;
+    dst.x = button.getPos().x * settings->win.scale * scale;
+    dst.y = button.getPos().y * settings->win.scale * scale;
+    dst.w = button.getCurrentFrame().w * settings->win.guiScale * ((float)scale / 2);
+    dst.h = button.getCurrentFrame().h * settings->win.guiScale * ((float)scale / 2);
 
-    SDL_RenderCopy(Renderer, button.getTexture(), &src, &dst);
+    SDL_RenderCopy(renderer, button.getTexture(), &src, &dst);
 }
 
 void RenderWindow::renderCursor(Entity& entity) {
@@ -114,16 +99,26 @@ void RenderWindow::renderCursor(Entity& entity) {
     SDL_Rect dst;
     dst.x = entity.getPos().x;
     dst.y = entity.getPos().y;
-    dst.w = entity.getCurrentFrame().w * settings->win.guiScale * 2;
-    dst.h = entity.getCurrentFrame().h * settings->win.guiScale * 2;
+    dst.w = entity.getCurrentFrame().w * settings->win.guiScale * ((float)scale / 2);
+    dst.h = entity.getCurrentFrame().h * settings->win.guiScale * ((float)scale / 2);
 
-    SDL_RenderCopy(Renderer, entity.getTexture(), &src, &dst);
+    SDL_RenderCopy(renderer, entity.getTexture(), &src, &dst);
 }
 
 void RenderWindow::display() {
-    SDL_RenderPresent(Renderer);
+    SDL_RenderPresent(renderer);
 }
 
 void RenderWindow::cleanUp() {
-    SDL_DestroyWindow(Window);
+    SDL_DestroyWindow(window);
+}
+
+void RenderWindow::calculateScale() {
+    int w, h;
+    SDL_GetWindowSize(window, &w, &h);
+    scale = min(floor(w / 180), floor(h / 166));
+}
+
+Uint8 RenderWindow::getScale() {
+    return scale;
 }
