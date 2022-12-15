@@ -7,7 +7,6 @@
 struct StatusRegister;
 struct ControlBus;
 
-
 using namespace std;
 
 typedef int8_t Int8;

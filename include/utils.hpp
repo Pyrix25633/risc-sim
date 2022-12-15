@@ -58,13 +58,12 @@ struct RendererFlags {
  * @param width The window width, type Uint32
  * @param maxFps The FPS limit, type Uint32
  * @param scale The scale, type float
- * @param guiScale The GUI scale, type float
  * @param fpsCounter If the FPS counter will be displayed, type bool
  * @param flags The renderer flags, type RendererFlags
 */
 struct WindowSettings {
     Uint32 height, width, maxFps;
-    float scale, guiScale;
+    float scale;
     bool fpsCounter;
     RendererFlags flags;
 };

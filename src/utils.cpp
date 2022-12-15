@@ -61,7 +61,6 @@ ostream& operator << (ostream& os, const Settings& settings) {
             << "Window Width: " << settings.win.width << endl
             << "Max Framerate: " << settings.win.maxFps << endl
             << "Scale: " << settings.win.scale << endl
-            << "Gui Scale: " << settings.win.guiScale << endl
             << "Vsync: " << ((settings.win.flags.vsync) ? "true" : "false") << endl
             << "GPU Acceleration: " << ((settings.win.flags.gpuAcc) ? "true" : "false") << endl
             << "Software Fallback: " << ((settings.win.flags.software) ? "true" : "false") << endl
@@ -109,12 +108,6 @@ Settings JsonManager::getSettings() {
     if(settings.win.scale < 0.5 || settings.win.scale > 3) {
         window["scale"] = 1.0;
         settings.win.scale = 1.0;
-        errors++;
-    }
-    settings.win.guiScale = window["gui_scale"].asFloat();
-    if(settings.win.guiScale < 0.5 || settings.win.guiScale > 3) {
-        window["gui_scale"] = 1.0;
-        settings.win.guiScale = 1.0;
         errors++;
     }
     settings.win.flags.vsync = rendererFlags["vsync"].asBool();

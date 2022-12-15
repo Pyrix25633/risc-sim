@@ -62,8 +62,8 @@ void RenderWindow::renderGui(Entity& entity) {
     SDL_Rect dst;
     dst.x = entity.getPos().x * settings->win.scale * scale;
     dst.y = entity.getPos().y * settings->win.scale * scale;
-    dst.w = entity.getCurrentFrame().w * settings->win.guiScale * ((float)scale / 2);
-    dst.h = entity.getCurrentFrame().h * settings->win.guiScale * ((float)scale / 2);
+    dst.w = entity.getCurrentFrame().w * settings->win.scale * ((float)scale / 2);
+    dst.h = entity.getCurrentFrame().h * settings->win.scale * ((float)scale / 2);
 
     SDL_RenderCopy(renderer, entity.getTexture(), &src, &dst);
 }
@@ -84,8 +84,8 @@ void RenderWindow::renderButton(Button& button) {
     SDL_Rect dst;
     dst.x = button.getPos().x * settings->win.scale * scale;
     dst.y = button.getPos().y * settings->win.scale * scale;
-    dst.w = button.getCurrentFrame().w * settings->win.guiScale * ((float)scale / 2);
-    dst.h = button.getCurrentFrame().h * settings->win.guiScale * ((float)scale / 2);
+    dst.w = button.getCurrentFrame().w * settings->win.scale * ((float)scale / 2);
+    dst.h = button.getCurrentFrame().h * settings->win.scale * ((float)scale / 2);
 
     SDL_RenderCopy(renderer, button.getTexture(), &src, &dst);
 }
@@ -99,8 +99,8 @@ void RenderWindow::renderCursor(Entity& entity) {
     SDL_Rect dst;
     dst.x = entity.getPos().x;
     dst.y = entity.getPos().y;
-    dst.w = entity.getCurrentFrame().w * settings->win.guiScale * ((float)scale / 2);
-    dst.h = entity.getCurrentFrame().h * settings->win.guiScale * ((float)scale / 2);
+    dst.w = entity.getCurrentFrame().w * settings->win.scale * ((float)scale / 2);
+    dst.h = entity.getCurrentFrame().h * settings->win.scale * ((float)scale / 2);
 
     SDL_RenderCopy(renderer, entity.getTexture(), &src, &dst);
 }
@@ -116,7 +116,8 @@ void RenderWindow::cleanUp() {
 void RenderWindow::calculateScale() {
     int w, h;
     SDL_GetWindowSize(window, &w, &h);
-    scale = min(floor(w / 180), floor(h / 166));
+    scale = min((int)(w / 180), (int)(h / 166));
+    if(scale < 2) scale = 2;
 }
 
 Uint8 RenderWindow::getScale() {

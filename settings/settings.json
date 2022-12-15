@@ -8,7 +8,6 @@
 	  "max_framerate": 120,
 		"fps_counter": true,
 		"scale": 1,
-		"gui_scale": 1,
 		"width": 722,
 		"height": 664,
 		"renderer_flags": {
