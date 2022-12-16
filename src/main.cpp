@@ -15,10 +15,10 @@ using namespace std;
 int main(int argc, char* args[]) {
     //Variables
     Logger logger;
-    Settings settings = JsonManager::getSettings(); //Variable to store the game settings from the json
+    Settings settings = JsonManager::getSettings(); //Variable to store the settings from the json
     Font font = JsonManager::getFont(); //Variable to store all the letters rects
-    bool running = true; //Variable to know if the game has to continue running or not
-    SDL_Event event; //Variable to store game Window events
+    bool running = true; //Variable to know if it has to continue running or not
+    SDL_Event event; //Variable to store window events
     Uint32 flags = JsonManager::getFlags(settings);
     Uint16 msStep = 1000 / settings.win.maxFps, fps = 1; //Variables to regulate the framerate
     Uint64 previousSecond, currentSecond;
