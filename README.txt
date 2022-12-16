@@ -154,14 +154,13 @@
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
 ║  │ + File: name of the file that contains the program, .bin if binary or .hex if hexadecimal  │   ║
 ║  │ + Ram Size: the dimension of the central memory, leave some space for the stack            │   ║
-║  │ + Start: the address where the program have to start                                       │   ║
+║  │ + Start: the address where the program has to start                                        │   ║
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Window                                                                                     │   ║
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
 ║  │ + FPS Counter: if FPS counter is active, true or false                                     │   ║
-║  │ + GUI Scale: the scale of the GUI, 0.5 to 3                                                │   ║
-║  │ + Scale: the scale for everything that is not a GUI, 0.5 to 3                              │   ║
+║  │ + Scale: the scale of the GUI, 0.5 to 3                                                    │   ║
 ║  │ + Height: the height of the window, change only if experiencing issues                     │   ║
 ║  │ + Width: the width of the window, change only if experiencing issues                       │   ║
 ║  │ + Max Framerate: render framerate cap                                                      │   ║
@@ -175,6 +174,6 @@
 ║  │ Console                                                                                    │   ║
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
 ║  │ + File Log: if the program will log to file or to console                                  │   ║
-║  │ + Output color: if the console will be colored                                             │   ║
+║  │ + Output Color: if the console will be colored                                             │   ║
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════════════╝

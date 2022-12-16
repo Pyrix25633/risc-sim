@@ -171,7 +171,7 @@ Uint32 JsonManager::getFlags(Settings settings) {
 
 Font JsonManager::getFont() {
     Font font;
-    ifstream file("res/img/font.json");
+    ifstream file("res/font.json");
     Value actualJson, letterValue;
     Reader reader;
     string str;
@@ -189,7 +189,7 @@ Font JsonManager::getFont() {
 
 Cursor JsonManager::getCursor() {
     Cursor cursor;
-    ifstream file("res/img/cursor.json");
+    ifstream file("res/cursor.json");
     Value actualJson, letterValue;
     Reader reader;
     reader.parse(file, actualJson);

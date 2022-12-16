@@ -39,6 +39,7 @@ int main(int argc, char* args[]) {
     InputOutputDevices IOD(&SB);
     CentralProcessingUnit CPU(&SB, &CM, &IOD, settings.interpreter);
     CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
+    IOD.input(0x0);
 
     //Capturing cout in log file
     if(settings.console.log) freopen("log.txt", "w", stdout);
@@ -47,49 +48,49 @@ int main(int argc, char* args[]) {
     //SDL and IMG initialization
     cout << logger.getStringTime();
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) > 0) {
-        cout << logger.error << "SDL Init FAILED! SDL_ERROR: " << SDL_GetError() << logger.reset << endl;
+        cout << logger.error << "SDL Initialization FAILED! SDL_ERROR: " << SDL_GetError() << logger.reset << endl;
     }
     else {
-        cout << logger.success << "SDL Init SUCCEEDED" << logger.reset << endl;
+        cout << logger.success << "SDL Initialized Succesfully" << logger.reset << endl;
     }
     cout << logger.getStringTime();
     if(!IMG_Init(IMG_INIT_PNG)) {
-        cout << logger.error << "IMG Init FAILED! IMG_ERROR: " << SDL_GetError() << logger.reset << endl;
+        cout << logger.error << "IMG Initialization FAILED! IMG_ERROR: " << SDL_GetError() << logger.reset << endl;
     }
     else {
-        cout << logger.success << "IMG Init SUCCEEDED" << logger.reset << endl;
+        cout << logger.success << "IMG Initialized Succesfully" << logger.reset << endl;
     }
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow window("RISC-CPU SIMULATOR v1.0.2", settings.win.width, settings.win.height,
-                        flags, &logger, &settings, "res/img/icon-64.png");
+    RenderWindow window("RISC-CPU SIMULATOR v1.0.3", settings.win.width, settings.win.height,
+                        flags, &logger, &settings, "res/icon-64.png");
     SDL_ShowCursor(0);
 
     //Loading the textures
-    SDL_Texture* cursorTexture = window.loadTexture("res/img/cursor.png");
-    SDL_Texture* iconTexture = window.loadTexture("res/img/icon.png");
-    SDL_Texture* fontTexture = window.loadTexture("res/img/font.png");
-    SDL_Texture* cpuGuiTexture = window.loadTexture("res/img/cpu_gui.png");
-    SDL_Texture* cmGuiTexture = window.loadTexture("res/img/cm_gui.png");
-    SDL_Texture* iodGuiTexture = window.loadTexture("res/img/iod_gui.png");
-    SDL_Texture* iodKeyTexture = window.loadTexture("res/img/key.png");
-    SDL_Texture* iodKeyPressedTexture = window.loadTexture("res/img/key_pressed.png");
-    SDL_Texture* sbGuiTexture = window.loadTexture("res/img/system_bus_gui.png");
-    SDL_Texture* progressBarTexture = window.loadTexture("res/img/progress_bar.png");
-    SDL_Texture* progressBarNowTexture = window.loadTexture("res/img/progress_bar_now.png");
-    SDL_Texture* progressBarNextTexture = window.loadTexture("res/img/progress_bar_next.png");
-    SDL_Texture* progressBarAllTexture = window.loadTexture("res/img/progress_bar_all.png");
-    SDL_Texture* fastTexture = window.loadTexture("res/img/fast_button.png");
-    SDL_Texture* playTexture = window.loadTexture("res/img/play_button.png");
-    SDL_Texture* nextTexture = window.loadTexture("res/img/next_button.png");
-    SDL_Texture* pauseTexture = window.loadTexture("res/img/pause_button.png");
-    SDL_Texture* reloadTexture = window.loadTexture("res/img/reload_button.png");
-    SDL_Texture* fastPressedTexture = window.loadTexture("res/img/fast_button_pressed.png");
-    SDL_Texture* playPressedTexture = window.loadTexture("res/img/play_button_pressed.png");
-    SDL_Texture* nextPressedTexture = window.loadTexture("res/img/next_button_pressed.png");
-    SDL_Texture* pausePressedTexture = window.loadTexture("res/img/pause_button_pressed.png");
-    SDL_Texture* reloadPressedTexture = window.loadTexture("res/img/reload_button_pressed.png");
+    SDL_Texture* cursorTexture = window.loadTexture("res/cursor.png");
+    SDL_Texture* iconTexture = window.loadTexture("res/icon.png");
+    SDL_Texture* fontTexture = window.loadTexture("res/font.png");
+    SDL_Texture* cpuGuiTexture = window.loadTexture("res/cpu_gui.png");
+    SDL_Texture* cmGuiTexture = window.loadTexture("res/cm_gui.png");
+    SDL_Texture* iodGuiTexture = window.loadTexture("res/iod_gui.png");
+    SDL_Texture* iodKeyTexture = window.loadTexture("res/key.png");
+    SDL_Texture* iodKeyPressedTexture = window.loadTexture("res/key_pressed.png");
+    SDL_Texture* sbGuiTexture = window.loadTexture("res/system_bus_gui.png");
+    SDL_Texture* progressBarTexture = window.loadTexture("res/progress_bar.png");
+    SDL_Texture* progressBarNowTexture = window.loadTexture("res/progress_bar_now.png");
+    SDL_Texture* progressBarNextTexture = window.loadTexture("res/progress_bar_next.png");
+    SDL_Texture* progressBarAllTexture = window.loadTexture("res/progress_bar_all.png");
+    SDL_Texture* fastTexture = window.loadTexture("res/fast_button.png");
+    SDL_Texture* playTexture = window.loadTexture("res/play_button.png");
+    SDL_Texture* nextTexture = window.loadTexture("res/next_button.png");
+    SDL_Texture* pauseTexture = window.loadTexture("res/pause_button.png");
+    SDL_Texture* reloadTexture = window.loadTexture("res/reload_button.png");
+    SDL_Texture* fastPressedTexture = window.loadTexture("res/fast_button_pressed.png");
+    SDL_Texture* playPressedTexture = window.loadTexture("res/play_button_pressed.png");
+    SDL_Texture* nextPressedTexture = window.loadTexture("res/next_button_pressed.png");
+    SDL_Texture* pausePressedTexture = window.loadTexture("res/pause_button_pressed.png");
+    SDL_Texture* reloadPressedTexture = window.loadTexture("res/reload_button_pressed.png");
     Entity cursorEntity(Vector2f(0, 0), cursorTexture);
     TextEntity fpsCounterEntity(Vector2f(3, 3), fontTexture, &font);
     //GUI backgrounds
