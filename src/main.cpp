@@ -63,7 +63,7 @@ int main(int argc, char* args[]) {
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow window("RISC-CPU SIMULATOR v1.0.3", settings.win.width, settings.win.height,
+    RenderWindow window("RISC-CPU SIMULATOR v1.0.4", settings.win.width, settings.win.height,
                         flags, &logger, &settings, "res/icon-64.png");
     SDL_ShowCursor(0);
 
@@ -312,10 +312,10 @@ int main(int argc, char* args[]) {
                         else if(code == SDL_SCANCODE_0 || code == SDL_SCANCODE_KP_0) {
                             key = '0';
                         }
-                        else if(code == SDL_SCANCODE_KP_ENTER) {
+                        else if(code == SDL_SCANCODE_RETURN || code == SDL_SCANCODE_KP_ENTER) {
                             key = '\r';
                         }
-                        else if(code == SDL_SCANCODE_KP_SPACE) {
+                        else if(code == SDL_SCANCODE_SPACE || code == SDL_SCANCODE_KP_SPACE) {
                             key = ' ';
                         }
                         IOD.input(key);
