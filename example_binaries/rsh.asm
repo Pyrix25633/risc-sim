@@ -1,0 +1,3 @@
+START: LDWI R0 0008
+       RSH
+       HLT

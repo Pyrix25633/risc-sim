@@ -137,7 +137,7 @@ namespace math {
     string StatusRegisterToHexstr(StatusRegister sr);
     /**
      * @brief Function to get the hex string from the Control Bus
-     * @param sr The Control Bus
+     * @param cb The Control Bus
      * @return The hex string
     */
     string ControlBusToHexstr(ControlBus cb);
@@ -147,4 +147,23 @@ namespace math {
      * @returns The twos complement
     */
     Uint16 twosComplement(Uint16 n);
+    /**
+     * @brief Function to get the register from an argument
+     * @param arg The argument
+     * @returns The register
+    */
+    string argumentToRegister(string arg);
+    /**
+     * @brief Function to transform a word into little endian
+     * @param w The word
+     * @returns The little endian string
+    */
+    vector<string> wordToLittleEndian(string w);
+    /**
+     * @brief Function to see if a string is contained in a string vector
+     * @param v The string vector
+     * @param s The string
+     * @returns True if found
+    */
+    bool vectorContains(vector<string> v, string s);
 }

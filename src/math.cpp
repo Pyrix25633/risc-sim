@@ -160,3 +160,23 @@ string math::ControlBusToHexstr(ControlBus cb) {
     s[3] = '\0';
     return s;
 }
+
+string math::argumentToRegister(string arg) {
+    if(arg.length() != 2 || arg[0] != 'R') throw(1);
+    return arg.substr(1, 1);
+}
+
+vector<string> math::wordToLittleEndian(string w) {
+    if(w.length() != 4) throw(2);
+    vector<string> v;
+    v.push_back(w.substr(2, 2));
+    v.push_back(w.substr(0, 2));
+    return v;
+}
+
+bool math::vectorContains(vector<string> v, string s) {
+    for(string e : v) {
+        if(e == s) return true;
+    }
+    return false;
+}

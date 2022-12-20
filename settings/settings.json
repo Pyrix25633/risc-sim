@@ -1,6 +1,6 @@
 {
   "interpreter": {
-    "file": "binary.hex",
+    "file": "rsh.asm",
     "ram_size": 100,
     "start": 0
   },

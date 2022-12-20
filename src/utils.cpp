@@ -69,7 +69,8 @@ ostream& operator << (ostream& os, const Settings& settings) {
             << "Log File: " << ((settings.console.log) ? "true" : "false") << endl
             << "Output Color: " << ((settings.console.color) ? "true" : "false") << endl
             << "Interpreter File: " << settings.interpreter.file
-            << " Type: " << ((settings.interpreter.binary) ? "binary" : "hexadecimal") << endl
+            << " Type: " << ((settings.interpreter.type == 0) ? "binary" :
+                (settings.interpreter.type == 1) ? "hexadecimal" : "assembly") << endl
             << "Interpreter Ram Size: " << settings.interpreter.ramSize << endl
             << "Interpreter Start Address: " << settings.interpreter.start;
 }
@@ -137,8 +138,9 @@ Settings JsonManager::getSettings() {
     }
     string binFile = settings.interpreter.file;
     Uint16 lenght = binFile.length();
-    settings.interpreter.binary = (binFile[lenght - 4] == '.' && binFile[lenght - 3] == 'b'
-        && binFile[lenght - 2] == 'i' && binFile[lenght - 1] == 'n');
+    if(binFile.substr(lenght - 4) == ".bin") settings.interpreter.type = 0;
+    else if(binFile.substr(lenght - 4) == ".hex") settings.interpreter.type = 1;
+    else settings.interpreter.type = 2;
     file.close();
     if(errors > 0) {
         ofstream outFile("settings/settings.json");

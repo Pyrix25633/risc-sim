@@ -76,7 +76,7 @@ struct WindowSettings {
 struct InterpreterSettings {
     string file;
     Uint32 ramSize, start;
-    bool binary;
+    Uint8 type;
 };
 /**
  * @brief Structure to contain binary interpreter settings

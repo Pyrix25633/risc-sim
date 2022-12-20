@@ -852,26 +852,316 @@ void CentralMemory::reset(Uint32 psize) {
     }
 }
 
-void CentralMemory::loadProgram(string path, bool bin, Logger* logger) {
-    ifstream file("binaries/" + path);
+void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
+    ifstream file("binaries/" + settings->file);
     if(!file) {
-        cout << logger->warning << "File " << path << " does not exist!" << logger->reset << endl;
+        cout << logger->warning << "File " << settings->file << " does not exist!" << logger->reset << endl;
         return;        
     }
-    if(bin) {
-        char s[100];
-        for(Uint32 i = 0; i < size && !file.eof(); i++) {
-            file.getline(s, 100);
-            M[i] = math::binstrToUint8(s);
-        }
+    char s[100];
+    switch(settings->type) {
+        case 0:
+            for(Uint32 i = 0; i < size && !file.eof(); i++) {
+                file.getline(s, 100);
+                M[i] = math::binstrToUint8(s);
+            }
+            break;
+        case 1:
+            for(Uint32 i = 0; i < size && !file.eof(); i++) {
+                file.getline(s, 100);
+                M[i] = math::hexstrToUint8(s);
+            }
+            break;
+        default:
+            try {
+                cout << logger->getStringTime() << logger->warning << "Assembling file into hex executable"
+                    << logger->reset << endl;
+                ofstream outFile("binaries/" + settings->file + ".hex");
+                vector<string> asmLines;
+                while(!file.eof()) {
+                    file.getline(s, 100);
+                    string line = s;
+                    int commentPos = line.find(';');
+                    if(commentPos != string::npos) {
+                        line = line.substr(0, commentPos);
+                    }
+                    Int8 i = 0;
+                    while(i < line.length() && line[i] == ' ') {
+                        i++;
+                    }
+                    line = line.substr(i);
+                    i = line.length() - 1;
+                    while(i >= 0 && line[i] == ' ') {
+                        i--;
+                    }
+                    line = line.substr(0, i + 1);
+                    if(line.length() == 0) continue;
+                    asmLines.push_back(line);
+                }
+                vector<string> labels;
+                for(string l : asmLines) {
+                    int labelPos = l.find(':');
+                    if(labelPos != string::npos) labels.push_back(l.substr(0, labelPos));
+                }
+                vector<string> hexLines;
+                for(string l : asmLines) {
+                    int labelPos = l.find(':');
+                    string label = "";
+                    if(labelPos != string::npos) {
+                        label = l.substr(0, labelPos + 1);
+                        l = l.substr(labelPos + 1);
+                        Int8 i = 0;
+                        while(i < l.length() && l[i] == ' ') {
+                            i++;
+                        }
+                        l = l.substr(i);
+                    }
+                    string inst, arg1 = "", arg2 = "";
+                    int spacePos = l.find(' ');
+                    if(spacePos != string::npos) {
+                        inst = l.substr(0, spacePos);
+                        l = l.substr(spacePos + 1);
+                    }
+                    else inst = l;
+                    spacePos = l.find(' ');
+                    if(spacePos != string::npos) {
+                        arg1 = l.substr(0, spacePos);
+                        l = l.substr(spacePos);
+                    }
+                    else arg1 = l;
+                    spacePos = l.find(' ');
+                    if(spacePos != string::npos) {
+                        arg2 = l.substr(spacePos + 1);
+                    }
+                    if(inst.substr(0, 2) == "LD") {
+                        switch(inst[3]) {
+                            case 'I': //LDWI or LDBI
+                                hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                                if(inst[2] == 'W') {
+                                    hexLines.push_back("10");
+                                    for(string le : math::wordToLittleEndian(arg2))
+                                        hexLines.push_back(le);
+                                }
+                                else {
+                                    hexLines.push_back("11");
+                                    hexLines.push_back(arg2);
+                                }
+                                break;
+                            case 'A': //LDWA or LDBA
+                                hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                                if(inst[2] == 'W') hexLines.push_back("20");
+                                else hexLines.push_back("21");
+                                if(!math::vectorContains(labels, arg2))
+                                    for(string le : math::wordToLittleEndian(arg2))
+                                        hexLines.push_back(le);
+                                else
+                                    hexLines.push_back(arg2); hexLines.push_back("");
+                                break;
+                            case 'R': //LDWR or LDBR
+                                hexLines.push_back(label + math::argumentToRegister(arg1) + math::argumentToRegister(arg2));
+                                if(inst[2] == 'W') hexLines.push_back("30");
+                                else hexLines.push_back("31");
+                        }
+                    }
+                    else if(inst.substr(0, 2) == "ST") {
+                        switch(inst[3]) {
+                            case 'A': //STWA or STBA
+                                hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                                if(inst[2] == 'W') hexLines.push_back("22");
+                                else hexLines.push_back("23");
+                                if(!math::vectorContains(labels, arg2))
+                                    for(string le : math::wordToLittleEndian(arg2))
+                                        hexLines.push_back(le);
+                                else
+                                    hexLines.push_back(arg2); hexLines.push_back("");
+                                break;
+                            case 'R': //STWR or STBR
+                                hexLines.push_back(label + math::argumentToRegister(arg1) + math::argumentToRegister(arg2));
+                                if(inst[2] == 'W') hexLines.push_back("32");
+                                else hexLines.push_back("33");
+                        }
+                    }
+                    else if(inst == "CP" || inst == "MV") { //CP
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + math::argumentToRegister(arg2));
+                        hexLines.push_back("04");
+                    }
+                    else if(inst == "PUSH") { //PUSH
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("08");
+                    }
+                    else if(inst == "POP") { //POP
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("09");
+                    }
+                    else if(inst == "SPWR") { //SPWR
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("0D");
+                    }
+                    else if(inst == "SPRD") { //SPRD
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("0E");
+                    }
+                    else if(inst == "ADD") { //ADD
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + math::argumentToRegister(arg2));
+                        hexLines.push_back("40");
+                    }
+                    else if(inst == "SUB") { //SUB
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + math::argumentToRegister(arg2));
+                        hexLines.push_back("41");
+                    }
+                    else if(inst == "NOT") { //NOT
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("42");
+                    }
+                    else if(inst == "AND") { //AND
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + math::argumentToRegister(arg2));
+                        hexLines.push_back("43");
+                    }
+                    else if(inst == "OR") { //OR
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + math::argumentToRegister(arg2));
+                        hexLines.push_back("44");
+                    }
+                    else if(inst == "XOR") { //XOR
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + math::argumentToRegister(arg2));
+                        hexLines.push_back("45");
+                    }
+                    else if(inst == "INC") { //INC
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("48");
+                    }
+                    else if(inst == "DEC") { //DEC
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("49");
+                    }
+                    else if(inst == "LSH") { //LSH
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("4A");
+                    }
+                    else if(inst == "RSH") { //RSH
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("4B");
+                    }
+                    else if(inst == "INB") { //INB
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("81");
+                        for(string le : math::wordToLittleEndian(arg2))
+                            hexLines.push_back(le);
+                    }
+                    else if(inst == "OUTB") { //OUTB
+                        hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
+                        hexLines.push_back("83");
+                        for(string le : math::wordToLittleEndian(arg2))
+                            hexLines.push_back(le);
+                    }
+                    else if(inst == "BR") { //BR
+                        hexLines.push_back(label + "00");
+                        hexLines.push_back("C0");
+                        if(!math::vectorContains(labels, arg1))
+                            for(string le : math::wordToLittleEndian(arg1))
+                                hexLines.push_back(le);
+                        else
+                            hexLines.push_back(arg1); hexLines.push_back("");
+                    }
+                    else if(inst.substr(0, 3) == "JMP") {
+                        hexLines.push_back(label + arg1);
+                        if(inst.length() == 3) //JMP
+                            hexLines.push_back("C1");
+                        else if(inst.substr(3) == "Z") //JMPZ
+                            hexLines.push_back("C2");
+                        else if(inst.substr(3) == "NZ") //JMPNZ
+                            hexLines.push_back("C3");
+                        else if(inst.substr(3) == "N") //JMPN
+                            hexLines.push_back("C4");
+                        else if(inst.substr(3) == "NZ") //JMPNN
+                            hexLines.push_back("C5");
+                        else if(inst.substr(3) == "C") //JMPC
+                            hexLines.push_back("C6");
+                        else if(inst.substr(3) == "V") //JMPC
+                            hexLines.push_back("C7");
+                    }
+                    else if(inst == "CALL") { //CALL
+                        hexLines.push_back(label + "00");
+                        hexLines.push_back("C8");
+                        if(!math::vectorContains(labels, arg1))
+                            for(string le : math::wordToLittleEndian(arg1))
+                                hexLines.push_back(le);
+                        else
+                            hexLines.push_back(arg1); hexLines.push_back("");
+                    }
+                    else if(inst == "RET") { //RET
+                        hexLines.push_back(label + "00");
+                        hexLines.push_back("C9");
+                    }
+                    else if(inst == "HLT") { //HLT
+                        hexLines.push_back(label + "00");
+                        hexLines.push_back("CF");
+                    }
+                    else if(inst == "WORD") { //WORD
+                        for(string le : math::wordToLittleEndian(arg1))
+                            hexLines.push_back(le);
+                    }
+                    else if(inst == "BYTE") { //BYTE
+                        hexLines.push_back(arg1);
+                    }
+                }
+                struct Label {
+                    string name;
+                    Uint16 address;
+                };
+                vector<Label> labelAddressAssociations;
+                for(int i = 0; i < hexLines.size(); i++) {
+                    string line = hexLines[i];
+                    int labelPos = line.find(':');
+                    if(labelPos != string::npos) {
+                        Label l;
+                        l.name = line.substr(0, labelPos);
+                        l.address = i;
+                        labelAddressAssociations.push_back(l);
+                        hexLines[i] = line.substr(labelPos + 1);
+                    }
+                }
+                for(int i = 0; i < hexLines.size(); i++) {
+                    string line = hexLines[i];
+                    int labelPos;
+                    for(Label l : labelAddressAssociations) {
+                        labelPos = line.find(l.name);
+                        if(labelPos != string::npos) {
+                            if(hexLines[i + 1] != "") {
+                                hexLines[i] = math::Uint8ToHexstr(Uint8(l.address - i - 2));
+                            }
+                            else {
+                                int j = 0;
+                                for(string s : math::wordToLittleEndian(math::Uint16ToHexstr(l.address))) {
+                                    hexLines[i + j] = s;
+                                    j++;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                for(string l : hexLines) {
+                    outFile << l << endl;
+                }
+                outFile.close();
+                cout << logger->getStringTime() << logger->success << "Succesfully assembled file into hex executable"
+                    << logger->reset << endl;
+                settings->file = settings->file + ".hex";
+                settings->type = 1;
+                settings->ramSize = hexLines.size() + 0xF0;
+                for(Label l : labelAddressAssociations) {
+                    if(l.name == "START") {
+                        settings->start = l.address;
+                    }
+                }
+                loadProgram(settings, logger);
+            }
+            catch(int e) {
+                cout << logger->getStringTime() << logger->error << "Error while assembling file into hex executable"
+                    << logger->reset << endl;
+            }
     }
-    else {
-        char s[100];
-        for(Uint32 i = 0; i < size && !file.eof(); i++) {
-            file.getline(s, 100);
-            M[i] = math::hexstrToUint8(s);
-        }
-    }
+    file.close();
 }
 
 void CentralMemory::operate() {

@@ -33,17 +33,18 @@ int main(int argc, char* args[]) {
     bool fullInstruction = false, constantFullInstruction = false, progressBarAll = false;
     Uint8 key; //For keyboard input
 
+    //Capturing cout in log file
+    if(settings.console.log) freopen("log.txt", "w", stdout);
+    logger.setColors(settings.console);
+
     //Interpreter
     SystemBus SB;
     CentralMemory CM(&SB, settings.interpreter.ramSize);
     InputOutputDevices IOD(&SB);
     CentralProcessingUnit CPU(&SB, &CM, &IOD, settings.interpreter);
-    CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
+    CM.loadProgram(&settings.interpreter, &logger);
+    CPU.reset(settings.interpreter);
     IOD.input(0x0);
-
-    //Capturing cout in log file
-    if(settings.console.log) freopen("log.txt", "w", stdout);
-    logger.setColors(settings.console);
 
     //SDL and IMG initialization
     cout << logger.getStringTime();
@@ -63,7 +64,7 @@ int main(int argc, char* args[]) {
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow window("RISC-CPU SIMULATOR v1.0.4", settings.win.width, settings.win.height,
+    RenderWindow window("RISC-CPU SIMULATOR v1.1.0", settings.win.width, settings.win.height,
                         flags, &logger, &settings, "res/icon-64.png");
     SDL_ShowCursor(0);
 
@@ -390,11 +391,11 @@ int main(int argc, char* args[]) {
                     refresh = true;
                     constantFullInstruction = false;
                     settings = JsonManager::getSettings();
-                    CPU.reset(settings.interpreter);
                     SB = SystemBus();
                     CM.reset(settings.interpreter.ramSize);
                     IOD.reset();
-                    CM.loadProgram(settings.interpreter.file, settings.interpreter.binary, &logger);
+                    CM.loadProgram(&settings.interpreter, &logger);
+                    CPU.reset(settings.interpreter);
                     msStep = 1000 / settings.win.maxFps;
                 }
             }

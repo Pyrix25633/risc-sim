@@ -446,8 +446,10 @@ class CentralMemory {
         void reset(Uint32 psize);
         /**
          * @brief Program to load the program
+         * @param interpreterSettings The interpreter settings, type IterpreterSettings
+         * @param logger The logger, type Logger
         */
-        void loadProgram(string path, bool bin, Logger* logger);
+        void loadProgram(InterpreterSettings* settings, Logger* logger);
         /**
          * @brief Function that reads the system bus and operate
         */
