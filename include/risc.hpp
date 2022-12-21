@@ -386,6 +386,14 @@ class CentralProcessingUnit{
         */
         void outb();
         /**
+         * @brief Function to test if the input operation has been completed
+        */
+        void tsti();
+        /**
+         * @brief Function to test if the output operation has been completed
+        */
+        void tsto();
+        /**
          * @brief Function to modify the program counter with an address after the instruction
         */
         void br();
@@ -494,8 +502,14 @@ class InputOutputDevices {
          * @param l3 Reference to the string for the line 3
         */
         void getLines(string &l0, string &l1, string &l2, string &l3);
+        /**
+         * @brief Function to see if a key byte was sent from the keyboard, not 0x00
+         * @returns True if a key byte was sent, false if 0x00 or nothing was sent
+        */
+        bool getSent();
     private:
         SystemBus* SB; //System Bus pointer
         Uint8 key;
         string line0, line1, line2, line3;
+        bool sent;
 };

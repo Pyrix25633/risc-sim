@@ -32,6 +32,7 @@ int main(int argc, char* args[]) {
     bool clicked = false, refresh = true, constantRefresh = false;
     bool fullInstruction = false, constantFullInstruction = false, progressBarAll = false;
     Uint8 key; //For keyboard input
+    bool shiftPressed = false;
 
     //Capturing cout in log file
     if(settings.console.log) freopen("log.txt", "w", stdout);
@@ -64,7 +65,7 @@ int main(int argc, char* args[]) {
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow window("RISC-CPU SIMULATOR v1.1.0", settings.win.width, settings.win.height,
+    RenderWindow window("RISC-CPU SIMULATOR v1.1.1", settings.win.width, settings.win.height,
                         flags, &logger, &settings, "res/icon-64.png");
     SDL_ShowCursor(0);
 
@@ -303,25 +304,25 @@ int main(int argc, char* args[]) {
                     case SDL_KEYDOWN:
                         if(code >= SDL_SCANCODE_A && code <= SDL_SCANCODE_Z) {
                             key = code + 93;
+                            if(shiftPressed) key -= 0x20;
                         }
-                        else if(code >= SDL_SCANCODE_1 && code <= SDL_SCANCODE_9) {
+                        else if(code >= SDL_SCANCODE_1 && code <= SDL_SCANCODE_9)
                             key = code + 19;
-                        }
-                        else if(code >= SDL_SCANCODE_KP_1 && code <= SDL_SCANCODE_KP_9) {
+                        else if(code >= SDL_SCANCODE_KP_1 && code <= SDL_SCANCODE_KP_9)
                             key = code - 40;
-                        }
-                        else if(code == SDL_SCANCODE_0 || code == SDL_SCANCODE_KP_0) {
+                        else if(code == SDL_SCANCODE_0 || code == SDL_SCANCODE_KP_0)
                             key = '0';
-                        }
-                        else if(code == SDL_SCANCODE_RETURN || code == SDL_SCANCODE_KP_ENTER) {
+                        else if(code == SDL_SCANCODE_RETURN || code == SDL_SCANCODE_KP_ENTER)
                             key = '\r';
-                        }
-                        else if(code == SDL_SCANCODE_SPACE || code == SDL_SCANCODE_KP_SPACE) {
+                        else if(code == SDL_SCANCODE_SPACE || code == SDL_SCANCODE_KP_SPACE)
                             key = ' ';
-                        }
+                        else if(!shiftPressed && (code == SDL_SCANCODE_LSHIFT || code == SDL_SCANCODE_RSHIFT))
+                            shiftPressed = true;
                         IOD.input(key);
                         break;
                     case SDL_KEYUP:
+                        if(shiftPressed && (code == SDL_SCANCODE_LSHIFT || code == SDL_SCANCODE_RSHIFT))
+                            shiftPressed = false;
                         key = 0x0;
                         IOD.input(key);
                         break;
@@ -475,32 +476,32 @@ int main(int argc, char* args[]) {
                     case '8': indexKey = 7; break;
                     case '9': indexKey = 8; break;
                     case '0': indexKey = 9; break;
-                    case 'q': indexKey = 10; break;
-                    case 'w': indexKey = 11; break;
-                    case 'e': indexKey = 12; break;
-                    case 'r': indexKey = 13; break;
-                    case 't': indexKey = 14; break;
-                    case 'y': indexKey = 15; break;
-                    case 'u': indexKey = 16; break;
-                    case 'i': indexKey = 17; break;
-                    case 'o': indexKey = 18; break;
-                    case 'p': indexKey = 19; break;
-                    case 'a': indexKey = 20; break;
-                    case 's': indexKey = 21; break;
-                    case 'd': indexKey = 22; break;
-                    case 'f': indexKey = 23; break;
-                    case 'g': indexKey = 24; break;
-                    case 'h': indexKey = 25; break;
-                    case 'j': indexKey = 26; break;
-                    case 'k': indexKey = 27; break;
-                    case 'l': indexKey = 28; break;
-                    case 'z': indexKey = 29; break;
-                    case 'x': indexKey = 30; break;
-                    case 'c': indexKey = 31; break;
-                    case 'v': indexKey = 32; break;
-                    case 'b': indexKey = 33; break;
-                    case 'n': indexKey = 34; break;
-                    case 'm': indexKey = 35; break;
+                    case 'q': case 'Q': indexKey = 10; break;
+                    case 'w': case 'W': indexKey = 11; break;
+                    case 'e': case 'E': indexKey = 12; break;
+                    case 'r': case 'R': indexKey = 13; break;
+                    case 't': case 'T': indexKey = 14; break;
+                    case 'y': case 'Y': indexKey = 15; break;
+                    case 'u': case 'U': indexKey = 16; break;
+                    case 'i': case 'I': indexKey = 17; break;
+                    case 'o': case 'O': indexKey = 18; break;
+                    case 'p': case 'P': indexKey = 19; break;
+                    case 'a': case 'A': indexKey = 20; break;
+                    case 's': case 'S': indexKey = 21; break;
+                    case 'd': case 'D': indexKey = 22; break;
+                    case 'f': case 'F': indexKey = 23; break;
+                    case 'g': case 'G': indexKey = 24; break;
+                    case 'h': case 'H': indexKey = 25; break;
+                    case 'j': case 'J': indexKey = 26; break;
+                    case 'k': case 'K': indexKey = 27; break;
+                    case 'l': case 'L': indexKey = 28; break;
+                    case 'z': case 'Z': indexKey = 29; break;
+                    case 'x': case 'X': indexKey = 30; break;
+                    case 'c': case 'C': indexKey = 31; break;
+                    case 'v': case 'V': indexKey = 32; break;
+                    case 'b': case 'B': indexKey = 33; break;
+                    case 'n': case 'N': indexKey = 34; break;
+                    case 'm': case 'M': indexKey = 35; break;
                 }
                 for(Uint8 i = 0; i < 36; i++) {
                     iodKeyEntities[i].setTexture(((i == indexKey) ? iodKeyPressedTexture : iodKeyTexture));

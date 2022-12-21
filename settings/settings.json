@@ -1,6 +1,6 @@
 {
   "interpreter": {
-    "file": "rsh.asm",
+    "file": "tst.asm",
     "ram_size": 100,
     "start": 0
   },

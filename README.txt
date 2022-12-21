@@ -133,6 +133,12 @@
 ║  │ + OUTB: to output a byte to monitor                                                        │   ║
 ║  │  - assembly: OUTB Rs hhhh                                                                  │   ║
 ║  │  - binary: 10000011ssss0000    hexadecimal: 83s0    status register: Z:-, N:-, C:-, V:-    │   ║
+║  │ + TSTI: to test if an input operation has been completed (Z = 1) or not (Z = 0)            │   ║
+║  │  - assembly: TSTI hhhh                                                                     │   ║
+║  │  - binary: 1000010000000000    hexadecimal: 8400    status register: Z:D, N:-, C:-, V:-    │   ║
+║  │ + TSTO: to test if an output operation has been completed (Z = 1, monitor is always ready) │   ║
+║  │  - assembly: TSTO hhhh                                                                     │   ║
+║  │  - binary: 1000010100000000    hexadecimal: 8500    status register: Z:D, N:-, C:-, V:-    │   ║
 ║  │ ! WARNING: I/O instructions have to be followed by the address (x16) of the I/O device     │   ║
 ║  │ ! \n (0x0A) will move all lines up by one, but will not move to a new line                 │   ║
 ║  │ ! \r (0x0D) will move to a new line, but will not move all lines up by one                 │   ║

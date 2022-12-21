@@ -405,6 +405,12 @@ void CentralProcessingUnit::executeInstruction() {
                 case 0x3:
                     outb();
                     break;
+                case 0x4:
+                    tsti();
+                    break;
+                case 0x5:
+                    tsto();
+                    break;
                 default:
                     phaseNext = 0xFF;
             }
@@ -591,12 +597,8 @@ string CentralProcessingUnit::decodeInstName() {
                 return "ERR!";
             }
             switch(I.opcode) {
-                case 0x0:
-                    return "INW";
                 case 0x1:
                     return "INB";
-                case 0x2:
-                    return "OUTW";
                 case 0x3:
                     return "OUTB";
                 case 0x4:
@@ -777,6 +779,19 @@ void CentralProcessingUnit::outb() {
     PC += 2;
 }
 
+void CentralProcessingUnit::tsti() {
+    if(SB->getData() == 0x1) {
+        SR.Z = IOD->getSent();
+    }
+    else SR.Z = 0;
+    PC += 2;
+}
+
+void CentralProcessingUnit::tsto() {
+    SR.Z = (SB->getData() == 0x0);
+    PC += 2;
+}
+
 void CentralProcessingUnit::br() {
     PC = SB->getData();
 }
@@ -933,7 +948,7 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                     if(spacePos != string::npos) {
                         arg2 = l.substr(spacePos + 1);
                     }
-                    if(inst.substr(0, 2) == "LD") {
+                    if(inst.substr(0, 2) == "LD" && inst.length() == 4) {
                         switch(inst[3]) {
                             case 'I': //LDWI or LDBI
                                 hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
@@ -963,7 +978,7 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                                 else hexLines.push_back("31");
                         }
                     }
-                    else if(inst.substr(0, 2) == "ST") {
+                    else if(inst.substr(0, 2) == "ST" && inst.length() == 4) {
                         switch(inst[3]) {
                             case 'A': //STWA or STBA
                                 hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
@@ -1053,6 +1068,13 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                         for(string le : math::wordToLittleEndian(arg2))
                             hexLines.push_back(le);
                     }
+                    else if(inst.substr(0, 3) == "TST" && inst.length() == 4) { //TSTI
+                        hexLines.push_back(label + "00");
+                        if(inst[3] == 'I') hexLines.push_back("84");
+                        else hexLines.push_back("85");
+                        for(string le : math::wordToLittleEndian(arg1))
+                            hexLines.push_back(le);
+                    }
                     else if(inst == "BR") { //BR
                         hexLines.push_back(label + "00");
                         hexLines.push_back("C0");
@@ -1062,7 +1084,7 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                         else
                             hexLines.push_back(arg1); hexLines.push_back("");
                     }
-                    else if(inst.substr(0, 3) == "JMP") {
+                    else if(inst.substr(0, 3) == "JMP" && (inst.length() >= 3 && inst.length() <= 5)) {
                         hexLines.push_back(label + arg1);
                         if(inst.length() == 3) //JMP
                             hexLines.push_back("C1");
@@ -1097,11 +1119,12 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                         hexLines.push_back("CF");
                     }
                     else if(inst == "WORD") { //WORD
-                        for(string le : math::wordToLittleEndian(arg1))
-                            hexLines.push_back(le);
+                        vector<string> le = math::wordToLittleEndian(arg1);
+                            hexLines.push_back(label + le[0]);
+                            hexLines.push_back(le[1]);
                     }
                     else if(inst == "BYTE") { //BYTE
-                        hexLines.push_back(arg1);
+                        hexLines.push_back(label + arg1);
                     }
                 }
                 struct Label {
@@ -1202,7 +1225,9 @@ Uint8 CentralMemory::get(Uint16 address) {
     return M[address];
 }
 
-InputOutputDevices::InputOutputDevices(SystemBus* pSB) :SB(pSB) {}
+InputOutputDevices::InputOutputDevices(SystemBus* pSB) :SB(pSB) {
+    sent = false;
+}
 
 void InputOutputDevices::reset() {
     line0 = line1 = line2 = line3 = "";
@@ -1282,6 +1307,7 @@ void InputOutputDevices::operate() {
     }
     else if(address == 0x1 && control.R) { //Input keyboard
         SB->writeData(key);
+        sent = (key != 0x0);
         key = 0x0;
     }
 }
@@ -1291,4 +1317,12 @@ void InputOutputDevices::getLines(string &l0, string &l1, string &l2, string &l3
     l1 = line1;
     l2 = line2;
     l3 = line3;
+}
+
+bool InputOutputDevices::getSent() {
+    if(sent) {
+        sent = false;
+        return true;
+    }
+    else return false;
 }
