@@ -40,9 +40,9 @@ int main(int argc, char* args[]) {
 
     //Interpreter
     SystemBus SB;
-    CentralMemory CM(&SB, settings.interpreter.ramSize);
+    CentralMemory CM(&SB);
     InputOutputDevices IOD(&SB);
-    CentralProcessingUnit CPU(&SB, &CM, &IOD, settings.interpreter);
+    CentralProcessingUnit CPU(&SB, &CM, &IOD);
     CM.loadProgram(&settings.interpreter, &logger);
     CPU.reset(settings.interpreter);
     IOD.input(0x0);
@@ -65,7 +65,7 @@ int main(int argc, char* args[]) {
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow window("RISC-CPU SIMULATOR v1.1.1", settings.win.width, settings.win.height,
+    RenderWindow window("RISC-CPU SIMULATOR v1.1.2", settings.win.width, settings.win.height,
                         flags, &logger, &settings, "res/icon-64.png");
     SDL_ShowCursor(0);
 
@@ -393,7 +393,6 @@ int main(int argc, char* args[]) {
                     constantFullInstruction = false;
                     settings = JsonManager::getSettings();
                     SB = SystemBus();
-                    CM.reset(settings.interpreter.ramSize);
                     IOD.reset();
                     CM.loadProgram(&settings.interpreter, &logger);
                     CPU.reset(settings.interpreter);

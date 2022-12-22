@@ -227,9 +227,8 @@ class CentralProcessingUnit{
          * @param pSB System bus pointer
          * @param pCM Central memory pointer
          * @param pIOD Input/output devices pointer
-         * @param settings The interpreter settings
         */
-        CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD, InterpreterSettings settings);
+        CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD);
         /**
          * @brief Function to reset the CPU
          * @param settings The interpreter settings
@@ -444,9 +443,8 @@ class CentralMemory {
         /**
          * @brief Contructor
          * @param pSB System bus pointer
-         * @param psize Memory fixed size
         */
-        CentralMemory(SystemBus* pSB, Uint32 psize);
+        CentralMemory(SystemBus* pSB);
         /**
          * @brief Function to reset the CM
          * @param psize Memory fixed size
@@ -507,9 +505,14 @@ class InputOutputDevices {
          * @returns True if a key byte was sent, false if 0x00 or nothing was sent
         */
         bool getSent();
+        /**
+         * @brief Function to see if a byte was received from the monitor
+         * @returns True if a byte was received, false otherwise
+        */
+        bool getReceived();
     private:
         SystemBus* SB; //System Bus pointer
         Uint8 key;
         string line0, line1, line2, line3;
-        bool sent;
+        bool sent, received;
 };

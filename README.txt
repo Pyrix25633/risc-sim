@@ -136,7 +136,7 @@
 ║  │ + TSTI: to test if an input operation has been completed (Z = 1) or not (Z = 0)            │   ║
 ║  │  - assembly: TSTI hhhh                                                                     │   ║
 ║  │  - binary: 1000010000000000    hexadecimal: 8400    status register: Z:D, N:-, C:-, V:-    │   ║
-║  │ + TSTO: to test if an output operation has been completed (Z = 1, monitor is always ready) │   ║
+║  │ + TSTO: to test if an output operation has been completed (Z = 1) or not (Z = 0)           │   ║
 ║  │  - assembly: TSTO hhhh                                                                     │   ║
 ║  │  - binary: 1000010100000000    hexadecimal: 8500    status register: Z:D, N:-, C:-, V:-    │   ║
 ║  │ ! WARNING: I/O instructions have to be followed by the address (x16) of the I/O device     │   ║

@@ -184,9 +184,9 @@ Uint16 ArithmeticLogicUnit::get(Uint8 r) {
     return R[r];
 }
 
-CentralProcessingUnit::CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD, InterpreterSettings settings)
-    :ALU(ArithmeticLogicUnit(&SR)), SB(pSB), CM(pCM), IOD(pIOD), PC(settings.start), phaseNow(0xFF), phaseNext(0x0), instName("-----"),
-    SP(settings.ramSize - 2), IR(0x0), AR(0x0), DR(0x0) {}
+CentralProcessingUnit::CentralProcessingUnit(SystemBus* pSB, CentralMemory* pCM, InputOutputDevices* pIOD)
+    :ALU(ArithmeticLogicUnit(&SR)), SB(pSB), CM(pCM), IOD(pIOD), PC(0), phaseNow(0xFF), phaseNext(0x0), instName("-----"),
+    SP(0), IR(0x0), AR(0x0), DR(0x0) {}
 
 void CentralProcessingUnit::reset(InterpreterSettings settings) {
     PC = settings.start;
@@ -780,15 +780,16 @@ void CentralProcessingUnit::outb() {
 }
 
 void CentralProcessingUnit::tsti() {
-    if(SB->getData() == 0x1) {
+    if(SB->getData() == 0x1)
         SR.Z = IOD->getSent();
-    }
     else SR.Z = 0;
     PC += 2;
 }
 
 void CentralProcessingUnit::tsto() {
-    SR.Z = (SB->getData() == 0x0);
+    if(SB->getData() == 0x0)
+        SR.Z = IOD->getReceived();
+    else SR.Z = 0;
     PC += 2;
 }
 
@@ -853,11 +854,7 @@ void CentralProcessingUnit::hlt() {
     phaseNext = 0xF0;
 }
 
-CentralMemory::CentralMemory(SystemBus* pSB, Uint32 psize) :SB(pSB), size(psize) {
-    for(Uint32 i = 0; i < size; i++) {
-        M.push_back(0x00);
-    }
-}
+CentralMemory::CentralMemory(SystemBus* pSB) :SB(pSB), size(0) {}
 
 void CentralMemory::reset(Uint32 psize) {
     size = psize;
@@ -876,12 +873,14 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
     char s[100];
     switch(settings->type) {
         case 0:
+            reset(settings->ramSize);
             for(Uint32 i = 0; i < size && !file.eof(); i++) {
                 file.getline(s, 100);
                 M[i] = math::binstrToUint8(s);
             }
             break;
         case 1:
+            reset(settings->ramSize);
             for(Uint32 i = 0; i < size && !file.eof(); i++) {
                 file.getline(s, 100);
                 M[i] = math::hexstrToUint8(s);
@@ -1171,10 +1170,11 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                     << logger->reset << endl;
                 settings->file = settings->file + ".hex";
                 settings->type = 1;
-                settings->ramSize = hexLines.size() + 0xF0;
+                settings->ramSize = hexLines.size() + 0xF0; settings->ramSize -= settings->ramSize % 2;
                 for(Label l : labelAddressAssociations) {
                     if(l.name == "START") {
                         settings->start = l.address;
+                        break;
                     }
                 }
                 loadProgram(settings, logger);
@@ -1194,9 +1194,8 @@ void CentralMemory::operate() {
     if(!CB.M) return;
     if(AB >= size) return;
     if(CB.R) {
-        if(!CB.W) {
+        if(!CB.W)
             DB = M[AB];
-        }
         else {
             Uint8 a;
             Uint16 b;
@@ -1207,9 +1206,8 @@ void CentralMemory::operate() {
         SB->writeData(DB);
     }
     else {
-        if(!CB.W) {
+        if(!CB.W)
             M[AB] = DB;
-        }
         else {
             Uint8 a, b;
             a = DB & 0xFF;
@@ -1226,11 +1224,13 @@ Uint8 CentralMemory::get(Uint16 address) {
 }
 
 InputOutputDevices::InputOutputDevices(SystemBus* pSB) :SB(pSB) {
-    sent = false;
+    reset();
 }
 
 void InputOutputDevices::reset() {
     line0 = line1 = line2 = line3 = "";
+    sent = false;
+    received = false;
 }
 
 void InputOutputDevices::input(Uint8 i) {
@@ -1304,6 +1304,7 @@ void InputOutputDevices::operate() {
         else {
             line0 += s;
         }
+        received = true;
     }
     else if(address == 0x1 && control.R) { //Input keyboard
         SB->writeData(key);
@@ -1324,5 +1325,13 @@ bool InputOutputDevices::getSent() {
         sent = false;
         return true;
     }
-    else return false;
+    return false;
+}
+
+bool InputOutputDevices::getReceived() {
+    if(received) {
+        received = false;
+        return true;
+    }
+    return false;
 }
