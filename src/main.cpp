@@ -65,7 +65,7 @@ int main(int argc, char* args[]) {
     //Printing the settings
     cout << logger.getStringTime() << logger.info << "Settings:" << endl << settings << logger.reset << endl;
     //Render the window
-    RenderWindow window("RISC-CPU SIMULATOR v1.1.2", settings.win.width, settings.win.height,
+    RenderWindow window("RISC-CPU SIMULATOR v1.1.3", settings.win.width, settings.win.height,
                         flags, &logger, &settings, "res/icon-64.png");
     SDL_ShowCursor(0);
 

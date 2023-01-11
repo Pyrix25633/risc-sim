@@ -728,7 +728,7 @@ void CentralProcessingUnit::stbr() {
 }
 
 void CentralProcessingUnit::cp() {
-    ALU.load(I.ra, ALU.get(I.rb));
+    ALU.load(I.rb, ALU.get(I.ra));
 }
 
 void CentralProcessingUnit::push() {
