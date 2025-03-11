@@ -7,9 +7,9 @@
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
 ║  │ + Program Counter: 16bit register for the address of the next instruction                  │   ║
 ║  │ + Instruction Register: 16bit register for the current instruction                         │   ║
-║  │ + Stack Pointer: 16bit register for the address of the next free location for the stack    │   ║
-║  │ + Address Register: 16bit register for the address to put on the address bus               │   ║
-║  │ + Data Register: 16bit register for the data to put on the data bus                        │   ║
+║  │ + Stack Pointer: 16bit register for the address of the next free location in the stack     │   ║
+║  │ + Address Register: 16bit register for the address to be put on the address bus            │   ║
+║  │ + Data Register: 16bit register for the data to be put on the data bus                     │   ║
 ║  │ + Status Register:                                                                         │   ║
 ║  │  - Z: 1bit register for zero                                                               │   ║
 ║  │  - N: 1bit register for negative                                                           │   ║
@@ -41,6 +41,35 @@
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════╣
 ║  Instructions                                                                                     ║
+║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
+║  │ Legend                                                                                     │   ║
+║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
+║  │ + s: source register                                                                       │   ║
+║  │ + d: destination register                                                                  │   ║
+║  │ + a: register containing the address                                                       │   ║
+║  │ + f: offset                                                                                │   ║
+║  │ + h: hexadecimal digit, if address or offset can be a label                                │   ║
+║  │ + D: depends                                                                               │   ║
+║  │ + -: unaffected                                                                            │   ║
+║  │ + 0: set to 0                                                                              │   ║
+║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
+║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
+║  │ Binary Instruction Structure                                                               │   ║
+║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
+║  │ + structure: ggmmiiiirrrrrrrr                                                              │   ║
+║  │ + g: group                                                                                 │   ║
+║  │  - 00: Data Transfer                                                                       │   ║
+║  │  - 01: Arithmetic-Logic                                                                    │   ║
+║  │  - 10: Input/Output                                                                        │   ║
+║  │  - 11: Control                                                                             │   ║
+║  │ + m: addressing method                                                                     │   ║
+║  │  - 00: not needed, data already in register/s                                              │   ║
+║  │  - 01: data is after the instruction                                                       │   ║
+║  │  - 10: data address is after the instruction                                               │   ║
+║  │  - 11: data address is in register                                                         │   ║
+║  │ + i: instruction identifier, see tables below                                              │   ║
+║  │ + r: register/s, offset or empty, see tables below                                         │   ║
+║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Data Transfer Group                                                                        │   ║
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
@@ -176,21 +205,9 @@
 ║  │ + RET: returns from the subroutine, where it was called                                    │   ║
 ║  │  - assembly: RET                                                                           │   ║
 ║  │  - binary: 1100100100000000    hexadecimal: C900    status register: Z:-, N:-, C:-, V:-    │   ║
-║  │ + HLT: exit the program                                                                    │   ║
+║  │ + HLT: exits the program                                                                   │   ║
 ║  │  - assembly: HLT                                                                           │   ║
 ║  │  - binary: 1100111100000000    hexadecimal: CF00    status register: Z:-, N:-, C:-, V:-    │   ║
-║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
-║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
-║  │ Legend                                                                                     │   ║
-║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
-║  │ + s: source register                                                                       │   ║
-║  │ + d: destination register                                                                  │   ║
-║  │ + a: register containing the address                                                       │   ║
-║  │ + f: offset                                                                                │   ║
-║  │ + h: hexadecimal digit, if address or offset can be a label                                │   ║
-║  │ + D: depends                                                                               │   ║
-║  │ + -: unaffected                                                                            │   ║
-║  │ + 0: setted to 0                                                                           │   ║
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ╠═══════════════════════════════════════════════════════════════════════════════════════════════════╣
 ║  Program Settings                                                                                 ║
