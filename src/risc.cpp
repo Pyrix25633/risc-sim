@@ -93,6 +93,7 @@ void ArithmeticLogicUnit::sub(Uint8 d, Uint8 s) {
     Int16 a = Int16(R[d]), b = Int16(R[s]);
     Int32 res = a - b, resc = R[d] + math::twosComplement(R[s]);
     R[d] -= R[s];
+    cout << "res: " << res << "R[d]" << R[d] << endl;
     SR->C = (resc > 0xFFFF);
     SR->V = (Int16(R[d]) != res);
     SR->N = (res < 0x0);
@@ -248,7 +249,7 @@ void CentralProcessingUnit::fetchOperand() {
         case 0x1: //LD$I
             AR = PC;
             SB->writeAddress(AR);
-            SB->writeControl(ControlBus(READ, MEMORY, WORD));
+            SB->writeControl(ControlBus(READ, MEMORY, (I.opcode & 0x0F00 == 0x0000) ? WORD : BYTE));
             CM->operate();
             break;
         case 0x2: //$$$A
@@ -272,7 +273,7 @@ void CentralProcessingUnit::fetchOperand() {
         case 0x3: //LD$R
             AR = ALU.get(I.rb);
             SB->writeAddress(AR);
-            SB->writeControl(ControlBus(READ, MEMORY, WORD));
+            SB->writeControl(ControlBus(READ, MEMORY, (I.opcode & 0x0F00 == 0x0000) ? WORD : BYTE));
             CM->operate();
     }
     phaseNow = 2;

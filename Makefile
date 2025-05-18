@@ -5,7 +5,7 @@ WININCLUDES = -I libs/SDL2/include -I C:/C++ -I libs
 WINCFLAGS = -L libs/SDL2/lib -lSDL2main -lSDL2 -lSDL2_image -L libs/jsoncpp/build-shared -ljsoncpp
 DEBUGFLAGS = -c src/*.cpp -std=c++14 -m64 -g -I include
 RELEASEFLAGS = -c src/*.cpp -std=c++14 -m64 -O3 -I include
-VERSION = 1.1.3
+VERSION = 1.1.4
 NAME = risc-sim
 
 default:
@@ -60,3 +60,8 @@ run-release:
 
 run-release-win:
 > ./bin/release/$(NAME)-$(VERSION).exe
+
+get-libraries:
+> ldd bin/release/$(NAME)-$(VERSION) | grep "=>" | cut -d " " -f 3 > bin/release/ldd.txt
+> xargs -a bin/release/ldd.txt cp -t bin/release
+> rm bin/release/ldd.txt
