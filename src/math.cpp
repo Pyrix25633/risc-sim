@@ -180,3 +180,14 @@ bool math::vectorContains(vector<string> v, string s) {
     }
     return false;
 }
+
+void math::handleLabelOrAddress(vector<string> labels, string arg, vector<string> &hexLines) {
+    if(!math::vectorContains(labels, arg))
+        for(string le : math::wordToLittleEndian(arg))
+            hexLines.push_back(le);
+    else {
+        hexLines.push_back(arg);
+        hexLines.push_back("");
+        cout << "Found address" << endl;
+    }
+}

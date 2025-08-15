@@ -4,3 +4,4 @@ bin/release/*
 binaries/*
 *.sh
 *.bat
+log.txt

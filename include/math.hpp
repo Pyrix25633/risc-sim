@@ -166,4 +166,11 @@ namespace math {
      * @returns True if found
     */
     bool vectorContains(vector<string> v, string s);
+    /**
+     * @brief Function that handles address conversion or placeholder for label
+     * @param labels Lables vector
+     * @param arg The instruction argument, either address or label
+     * @param hexLines The semi-compiled code
+     */
+    void handleLabelOrAddress(vector<string> labels, string arg, vector<string> &hexLines);
 }

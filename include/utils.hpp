@@ -72,6 +72,7 @@ struct WindowSettings {
  * @param file The file name containing the binary, type string
  * @param ramSize The fixed size of the virtual memory avaiable to the virtual system
  * @param start The address of first program code line
+ * @param type Encoding type, 0: bin, 1: hex, 2: asm
 */
 struct InterpreterSettings {
     string file;

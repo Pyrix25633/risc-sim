@@ -93,7 +93,6 @@ void ArithmeticLogicUnit::sub(Uint8 d, Uint8 s) {
     Int16 a = Int16(R[d]), b = Int16(R[s]);
     Int32 res = a - b, resc = R[d] + math::twosComplement(R[s]);
     R[d] -= R[s];
-    cout << "res: " << res << "R[d]" << R[d] << endl;
     SR->C = (resc > 0xFFFF);
     SR->V = (Int16(R[d]) != res);
     SR->N = (res < 0x0);
@@ -954,8 +953,7 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                                 hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
                                 if(inst[2] == 'W') {
                                     hexLines.push_back("10");
-                                    for(string le : math::wordToLittleEndian(arg2))
-                                        hexLines.push_back(le);
+                                    math::handleLabelOrAddress(labels, arg2, hexLines);
                                 }
                                 else {
                                     hexLines.push_back("11");
@@ -966,11 +964,7 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                                 hexLines.push_back(label + math::argumentToRegister(arg1) + "0");
                                 if(inst[2] == 'W') hexLines.push_back("20");
                                 else hexLines.push_back("21");
-                                if(!math::vectorContains(labels, arg2))
-                                    for(string le : math::wordToLittleEndian(arg2))
-                                        hexLines.push_back(le);
-                                else
-                                    hexLines.push_back(arg2); hexLines.push_back("");
+                                math::handleLabelOrAddress(labels, arg2, hexLines);
                                 break;
                             case 'R': //LDWR or LDBR
                                 hexLines.push_back(label + math::argumentToRegister(arg1) + math::argumentToRegister(arg2));
@@ -1078,11 +1072,7 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                     else if(inst == "BR") { //BR
                         hexLines.push_back(label + "00");
                         hexLines.push_back("C0");
-                        if(!math::vectorContains(labels, arg1))
-                            for(string le : math::wordToLittleEndian(arg1))
-                                hexLines.push_back(le);
-                        else
-                            hexLines.push_back(arg1); hexLines.push_back("");
+                        math::handleLabelOrAddress(labels, arg1, hexLines);
                     }
                     else if(inst.substr(0, 3) == "JMP" && (inst.length() >= 3 && inst.length() <= 5)) {
                         hexLines.push_back(label + arg1);
@@ -1104,11 +1094,7 @@ void CentralMemory::loadProgram(InterpreterSettings* settings, Logger* logger) {
                     else if(inst == "CALL") { //CALL
                         hexLines.push_back(label + "00");
                         hexLines.push_back("C8");
-                        if(!math::vectorContains(labels, arg1))
-                            for(string le : math::wordToLittleEndian(arg1))
-                                hexLines.push_back(le);
-                        else
-                            hexLines.push_back(arg1); hexLines.push_back("");
+                        math::handleLabelOrAddress(labels, arg1, hexLines);
                     }
                     else if(inst == "RET") { //RET
                         hexLines.push_back(label + "00");

@@ -54,6 +54,16 @@
 ║  │ + 0: set to 0                                                                              │   ║
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
+║  │ Data                                                                                       │   ║
+║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
+║  │ + Memory cells can be set to contain predefined data wituout using a write instruction     │   ║
+║  │ + assembly: use the following compiler instructions                                        │   ║
+║  │  - BYTE hh                                                                                 │   ║
+║  │  - WORD hhhh                                                                               │   ║
+║  │ + binary: just write the data in binary                                                    │   ║
+║  │ + hexadecimal: just write the data in exadecimal                                           │   ║
+║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
+║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Binary Instruction Structure                                                               │   ║
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
 ║  │ + structure: ggmmiiiirrrrrrrr                                                              │   ║
@@ -71,9 +81,21 @@
 ║  │ + r: register/s, offset or empty, see tables below                                         │   ║
 ║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
 ║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
+║  │ Labels and Comments                                                                        │   ║
+║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
+║  │ + Comments                                                                                 │   ║
+║  │  - Can be used to make explanations about the code                                         │   ║
+║  │  - Are ignored by the compiler and not loaded in memory                                    │   ║
+║  │  - everywhere: write the comment after ';' following an instruction or some data           │   ║
+║  │ + Labels                                                                                   │   ║
+║  │  - Can be used in assembly as automatic aliases for addresses                              │   ║
+║  │  - As such they can be written where an address would go                                   │   ║
+║  │  - assembly: write the label name followed by ':' and an instruction or some data          │   ║
+║  └────────────────────────────────────────────────────────────────────────────────────────────┘   ║
+║  ┌────────────────────────────────────────────────────────────────────────────────────────────┐   ║
 ║  │ Data Transfer Group                                                                        │   ║
 ║  ├────────────────────────────────────────────────────────────────────────────────────────────┤   ║
-║  │ + LDWI: loads a word, that is after the instruction, in "d"                                │   ║
+║  │ + LDWI: loads a word, that is after the instruction, in "d", can be a label                │   ║
 ║  │  - assembly: LDWI Rd hhhh                                                                  │   ║
 ║  │  - binary: 00010000dddd0000    hexadecimal: 10d0    status register: Z:D, N:D, C:-, V:-    │   ║
 ║  │ + LDWA: loads a word, whose address is after the instruction, in "d"                       │   ║
